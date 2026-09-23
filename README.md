@@ -28,13 +28,11 @@ then runs `Hydra/serve-presets.mjs`. The server is up when the window says
 - The server re-reads a sketch file on every request, so after editing a preset you only
   need to reload the page. Changes to `serve-presets.mjs` itself need a restart.
 
-Useful URLs once it runs:
+The page TouchDesigner loads once it runs (three panes stacked vertically):
 
-| URL | What it shows |
-|---|---|
-| `http://localhost:8080/` | Index of every preset |
-| `http://localhost:8080/main-1` | One sketch full screen (`main-1`, `main-2`, `main-3`, `preset-N`, `unique-N`) |
-| `http://localhost:8080/split?a=main-1&b=main-2&c=main-3&dir=v&scale=0.5&stagger=0` | The wall page TouchDesigner loads: three panes stacked vertically |
+```
+http://localhost:8080/split?a=main-1&b=main-2&c=main-3&dir=v&scale=0.5&stagger=0
+```
 
 ## 2. Open the TouchDesigner project
 
