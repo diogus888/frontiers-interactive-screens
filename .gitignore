@@ -24,10 +24,6 @@ logs/
 briefs/
 
 # --- Hydra ---
-# Fork of hydra-synth (own git repo: diogus888/hydra-unlimited-buffers)
-Hydra/hydra/
-# Rendered clip frames (2+ GB)
-Hydra/clips/
 node_modules/
 *.log
 
@@ -35,3 +31,4 @@ node_modules/
 .DS_Store
 Thumbs.db
 desktop.ini
+# Hydra/hydra is a git submodule (diogus888/hydra-unlimited-buffers); its own .gitignore excludes the font and renders.

@@ -1,0 +1,3 @@
+[submodule "Hydra/hydra"]
+	path = Hydra/hydra
+	url = https://github.com/diogus888/hydra-unlimited-buffers.git
