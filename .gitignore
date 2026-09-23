@@ -1,0 +1,37 @@
+# --- TouchDesigner ---
+Backup/
+CrashAutoSave*.toe
+# Numbered save-increment copies (TD rewrites these on every save)
+*.[0-9]*.toe
+TDImportCache/
+*.toe.bak
+*.dmp
+
+# --- Embody / Envoy runtime (regenerated on startup; keep config/project/manifest) ---
+.venv/
+logs/
+.embody_backup/
+.embody/envoy-bridge.py
+.embody/envoy.json
+.embody/envoy-tools-cache.json
+.embody/catalog_*.json
+.embody/local.json
+.embody/tasks.json
+.embody/.ai-first-launch
+.embody/launch_claude.bat
+.mcp.json
+.claude/settings.local.json
+briefs/
+
+# --- Hydra ---
+# Fork of hydra-synth (own git repo: diogus888/hydra-unlimited-buffers)
+Hydra/hydra/
+# Rendered clip frames (2+ GB)
+Hydra/clips/
+node_modules/
+*.log
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+desktop.ini

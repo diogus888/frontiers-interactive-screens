@@ -1,0 +1,1476 @@
+format: tdxn
+version: '2.1'
+build: 4
+generator: Embody/6.2.56
+td_build: 099.2025.33230
+network_path: /project1/ScreenMap
+options:
+  include_dat_content: false
+  include_storage: true
+type_defaults:
+  containerCOMP:
+    parameters:
+      repocomp: =me
+      resizecomp: =me
+    size: [160, 130]
+    color: [0.67, 0.67, 0.67]
+  panelexecuteDAT:
+    parameters:
+      fromop: =parent()
+      panels: screen_*
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  tableDAT:
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+type: baseCOMP
+custom_pars:
+  ScreenMap:
+  - name: Mockup
+    style: COMP
+    label: Mockup COMP
+    default: base1
+    help: 'The COMP holding the mockup: rect_<screen> rectangle POPs and crop_<screen> Crop TOPs that this tool drives, plus the crop_paneN group canvases.'
+    value: /project1/base1
+  - name: Cmperunit
+    style: Float
+    label: cm per World Unit
+    default: 100
+    min: 0.001
+    clampMin: true
+    normMin: 1.0
+    normMax: 200.0
+    help: How many centimetres one world unit of the mockup represents. The rectangles are sized as cm / this value. 100 means 1 unit = 1 m.
+  - name: Panew
+    style: Int
+    label: Group Canvas Width
+    default: 1280
+    min: 1.0
+    clampMin: true
+    normMax: 3840.0
+    help: Pixel width of each interactive group canvas (the hydra pane the crops cut from).
+  - name: Paneh
+    style: Int
+    label: Group Canvas Height
+    default: 720
+    min: 1.0
+    clampMin: true
+    normMax: 2160.0
+    help: Pixel height of each interactive group canvas.
+  - name: Viewx
+    style: Float
+    label: Editor View Centre X
+    startSection: true
+    normMin: -5.0
+    normMax: 5.0
+    help: World-unit X at the centre of the editor panel.
+  - name: Viewy
+    style: Float
+    label: Editor View Centre Y
+    normMin: -5.0
+    normMax: 5.0
+    help: World-unit Y at the centre of the editor panel.
+  - name: Vieww
+    style: Float
+    label: Editor View Width
+    default: 5.4
+    min: 0.1
+    clampMin: true
+    normMin: 1.0
+    normMax: 20.0
+    help: How many world units the editor panel spans horizontally. Smaller = zoomed in.
+  - name: Snapcm
+    style: Float
+    label: Drag Snap (cm)
+    clampMin: true
+    normMax: 50.0
+    help: Dragged screen positions snap to multiples of this many cm. 0 = no snapping.
+  - name: Rebuild
+    style: Pulse
+    label: Rebuild Layout
+    startSection: true
+    help: Recompute the layout table from the screens table. Normally automatic on every table edit.
+  - name: Ghostopacity
+    style: Float
+    label: Hover Ghost Opacity
+    default: 0.15
+    clampMin: true
+    clampMax: true
+    help: Opacity of the full group canvas (the whole hydra pane) shown behind a group while the cursor is over one of its screens in the editor.
+parameters:
+  parentshortcut: ScreenMap
+  opshortcut: ScreenMap
+sequences:
+  ext:
+  - object: op('./ScreenMapExt').module.ScreenMapExt(me)
+    name: ScreenMap
+    promote: true
+flags:
+- viewer
+color: [0.3, 0.5, 0.9]
+tags:
+- tdxn
+operators:
+- name: editor
+  type: containerCOMP
+  parameters:
+    w: 1280
+    h: 720
+    bgcolorr: 0.12
+    bgcolorg: 0.12
+    bgcolorb: 0.12
+    bgalpha: 1
+    drag: usecallbacks
+  flags:
+  - viewer
+  position: [1200, 0]
+  children:
+  - name: ghost_g1
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.GroupLayout('g1', 'panx')
+      y: =parent.ScreenMap.GroupLayout('g1', 'pany')
+      w: =parent.ScreenMap.GroupLayout('g1', 'panw')
+      h: =parent.ScreenMap.GroupLayout('g1', 'panh')
+      top: =parent.ScreenMap.GroupTOP('g1')
+      opacity: =parent.ScreenMap.par.Ghostopacity if parent.ScreenMap.GroupHovered('g1') else 0
+    position: [800, 0]
+  - name: ghost_g2
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.GroupLayout('g2', 'panx')
+      y: =parent.ScreenMap.GroupLayout('g2', 'pany')
+      w: =parent.ScreenMap.GroupLayout('g2', 'panw')
+      h: =parent.ScreenMap.GroupLayout('g2', 'panh')
+      top: =parent.ScreenMap.GroupTOP('g2')
+      opacity: =parent.ScreenMap.par.Ghostopacity if parent.ScreenMap.GroupHovered('g2') else 0
+    position: [800, -200]
+  - name: ghost_g3
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.GroupLayout('g3', 'panx')
+      y: =parent.ScreenMap.GroupLayout('g3', 'pany')
+      w: =parent.ScreenMap.GroupLayout('g3', 'panw')
+      h: =parent.ScreenMap.GroupLayout('g3', 'panh')
+      top: =parent.ScreenMap.GroupTOP('g3')
+      opacity: =parent.ScreenMap.par.Ghostopacity if parent.ScreenMap.GroupHovered('g3') else 0
+    position: [800, -400]
+  - name: drag_exec
+    type: panelexecuteDAT
+    parameters:
+      panelvalue: lselect
+      whileon: true
+      ontooff: true
+    position: [1000, 0]
+    dat_content: |
+      # Drag a screen tile to move that screen. The cursor is read on the editor (this DAT's parent),
+      # converted to cm through the extension, and written to the screens table via setScreenPosition,
+      # which re-derives the layout so every tile, mockup rectangle and crop follows.
+
+      def _name(panelValue):
+          return panelValue.owner.name[len('screen_'):]
+
+
+      def _cursorCm():
+          editor = parent()
+          return parent.ScreenMap.ext.ScreenMap.editorToCm(editor.panel.insideu, editor.panel.insidev)
+
+
+      def onOffToOn(panelValue):
+          if not parent.ScreenMap.extensionsReady:
+              return
+          try:
+              name = _name(panelValue)
+              t = parent.ScreenMap.op('screens')
+              cx, cy = float(t[name, 'xcm']), float(t[name, 'ycm'])
+              mx, my = _cursorCm()
+              parent().store('drag', {'name': name, 'dx': cx - mx, 'dy': cy - my, 'last': (cx, cy)})
+          except Exception as e:
+              debug('drag start failed: %s' % e)
+          return
+
+
+      def whileOn(panelValue):
+          if not parent.ScreenMap.extensionsReady:
+              return
+          try:
+              d = parent().fetch('drag', None)
+              if not d or d['name'] != _name(panelValue):
+                  return
+              mx, my = _cursorCm()
+              x, y = mx + d['dx'], my + d['dy']
+              lx, ly = d['last']
+              if abs(x - lx) < 0.01 and abs(y - ly) < 0.01:
+                  return
+              d['last'] = (x, y)
+              parent().store('drag', d)
+              parent.ScreenMap.ext.ScreenMap.setScreenPosition(d['name'], x, y)
+          except Exception as e:
+              debug('drag failed: %s' % e)
+          return
+
+
+      def onOnToOff(panelValue):
+          parent().unstore('drag')
+          return
+
+
+      def whileOff(panelValue):
+          return
+
+
+      def onValueChange(panelValue):
+          return
+    dat_content_format: text
+  - name: screen_u01
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('u01', 'panx')
+      y: =parent.ScreenMap.Layout('u01', 'pany')
+      w: =parent.ScreenMap.Layout('u01', 'panw')
+      h: =parent.ScreenMap.Layout('u01', 'panh')
+      layer: =parent.ScreenMap.Layout('u01', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('u01')
+      borderar: 0.6
+      borderag: 0.6
+      borderab: 0.6
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [200, -400]
+  - name: screen_u02
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('u02', 'panx')
+      y: =parent.ScreenMap.Layout('u02', 'pany')
+      w: =parent.ScreenMap.Layout('u02', 'panw')
+      h: =parent.ScreenMap.Layout('u02', 'panh')
+      layer: =parent.ScreenMap.Layout('u02', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('u02')
+      borderar: 0.6
+      borderag: 0.6
+      borderab: 0.6
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [400, -400]
+  - name: screen_u03
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('u03', 'panx')
+      y: =parent.ScreenMap.Layout('u03', 'pany')
+      w: =parent.ScreenMap.Layout('u03', 'panw')
+      h: =parent.ScreenMap.Layout('u03', 'panh')
+      layer: =parent.ScreenMap.Layout('u03', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('u03')
+      borderar: 0.6
+      borderag: 0.6
+      borderab: 0.6
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [600, -400]
+  - name: screen_u04
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('u04', 'panx')
+      y: =parent.ScreenMap.Layout('u04', 'pany')
+      w: =parent.ScreenMap.Layout('u04', 'panw')
+      h: =parent.ScreenMap.Layout('u04', 'panh')
+      layer: =parent.ScreenMap.Layout('u04', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('u04')
+      borderar: 0.6
+      borderag: 0.6
+      borderab: 0.6
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [0, -600]
+  - name: screen_u05
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('u05', 'panx')
+      y: =parent.ScreenMap.Layout('u05', 'pany')
+      w: =parent.ScreenMap.Layout('u05', 'panw')
+      h: =parent.ScreenMap.Layout('u05', 'panh')
+      layer: =parent.ScreenMap.Layout('u05', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('u05')
+      borderar: 0.6
+      borderag: 0.6
+      borderab: 0.6
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [200, -600]
+  - name: screen_u06
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('u06', 'panx')
+      y: =parent.ScreenMap.Layout('u06', 'pany')
+      w: =parent.ScreenMap.Layout('u06', 'panw')
+      h: =parent.ScreenMap.Layout('u06', 'panh')
+      layer: =parent.ScreenMap.Layout('u06', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('u06')
+      borderar: 0.6
+      borderag: 0.6
+      borderab: 0.6
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [400, -600]
+  - name: screen_u07
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('u07', 'panx')
+      y: =parent.ScreenMap.Layout('u07', 'pany')
+      w: =parent.ScreenMap.Layout('u07', 'panw')
+      h: =parent.ScreenMap.Layout('u07', 'panh')
+      layer: =parent.ScreenMap.Layout('u07', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('u07')
+      borderar: 0.6
+      borderag: 0.6
+      borderab: 0.6
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [600, -600]
+  - name: rclick_exec
+    type: panelexecuteDAT
+    parameters:
+      panelvalue: rselect
+    position: [1000, -200]
+    dat_content: |
+      # Right-click on a screen tile: send that screen to the back (depth 0). Both the mockup's Z order
+      # (rect tz) and the editor tile layer follow the screens table's depth column.
+
+      def onOffToOn(panelValue):
+          if not parent.ScreenMap.extensionsReady:
+              return
+          name = panelValue.owner.name
+          if not name.startswith('screen_'):
+              return
+          try:
+              parent.ScreenMap.ext.ScreenMap.sendToBack(name[len('screen_'):])
+          except Exception as e:
+              debug('sendToBack failed for %s: %s' % (name, e))
+          return
+
+      def whileOn(panelValue):
+          return
+
+      def onOnToOff(panelValue):
+          return
+
+      def whileOff(panelValue):
+          return
+
+      def onValueChange(panelValue):
+          return
+    dat_content_format: text
+  - name: screen_g1_01
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g1_01', 'panx')
+      y: =parent.ScreenMap.Layout('g1_01', 'pany')
+      w: =parent.ScreenMap.Layout('g1_01', 'panw')
+      h: =parent.ScreenMap.Layout('g1_01', 'panh')
+      layer: =parent.ScreenMap.Layout('g1_01', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g1_01')
+      borderar: 0.85
+      borderag: 0.25
+      borderab: 0.25
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+  - name: screen_g1_02
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g1_02', 'panx')
+      y: =parent.ScreenMap.Layout('g1_02', 'pany')
+      w: =parent.ScreenMap.Layout('g1_02', 'panw')
+      h: =parent.ScreenMap.Layout('g1_02', 'panh')
+      layer: =parent.ScreenMap.Layout('g1_02', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g1_02')
+      borderar: 0.85
+      borderag: 0.25
+      borderab: 0.25
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [200, 0]
+  - name: screen_g1_03
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g1_03', 'panx')
+      y: =parent.ScreenMap.Layout('g1_03', 'pany')
+      w: =parent.ScreenMap.Layout('g1_03', 'panw')
+      h: =parent.ScreenMap.Layout('g1_03', 'panh')
+      layer: =parent.ScreenMap.Layout('g1_03', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g1_03')
+      borderar: 0.85
+      borderag: 0.25
+      borderab: 0.25
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [400, 0]
+  - name: screen_g2_01
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g2_01', 'panx')
+      y: =parent.ScreenMap.Layout('g2_01', 'pany')
+      w: =parent.ScreenMap.Layout('g2_01', 'panw')
+      h: =parent.ScreenMap.Layout('g2_01', 'panh')
+      layer: =parent.ScreenMap.Layout('g2_01', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g2_01')
+      borderar: 0.25
+      borderag: 0.75
+      borderab: 0.3
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [600, 0]
+  - name: screen_g2_02
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g2_02', 'panx')
+      y: =parent.ScreenMap.Layout('g2_02', 'pany')
+      w: =parent.ScreenMap.Layout('g2_02', 'panw')
+      h: =parent.ScreenMap.Layout('g2_02', 'panh')
+      layer: =parent.ScreenMap.Layout('g2_02', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g2_02')
+      borderar: 0.25
+      borderag: 0.75
+      borderab: 0.3
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [0, -200]
+  - name: screen_g2_03
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g2_03', 'panx')
+      y: =parent.ScreenMap.Layout('g2_03', 'pany')
+      w: =parent.ScreenMap.Layout('g2_03', 'panw')
+      h: =parent.ScreenMap.Layout('g2_03', 'panh')
+      layer: =parent.ScreenMap.Layout('g2_03', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g2_03')
+      borderar: 0.25
+      borderag: 0.75
+      borderab: 0.3
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [200, -200]
+  - name: screen_g3_01
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g3_01', 'panx')
+      y: =parent.ScreenMap.Layout('g3_01', 'pany')
+      w: =parent.ScreenMap.Layout('g3_01', 'panw')
+      h: =parent.ScreenMap.Layout('g3_01', 'panh')
+      layer: =parent.ScreenMap.Layout('g3_01', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g3_01')
+      borderar: 0.3
+      borderag: 0.4
+      borderab: 0.9
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [400, -200]
+  - name: screen_g3_02
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g3_02', 'panx')
+      y: =parent.ScreenMap.Layout('g3_02', 'pany')
+      w: =parent.ScreenMap.Layout('g3_02', 'panw')
+      h: =parent.ScreenMap.Layout('g3_02', 'panh')
+      layer: =parent.ScreenMap.Layout('g3_02', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g3_02')
+      borderar: 0.3
+      borderag: 0.4
+      borderab: 0.9
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [600, -200]
+  - name: screen_g3_03
+    type: containerCOMP
+    parameters:
+      x: =parent.ScreenMap.Layout('g3_03', 'panx')
+      y: =parent.ScreenMap.Layout('g3_03', 'pany')
+      w: =parent.ScreenMap.Layout('g3_03', 'panw')
+      h: =parent.ScreenMap.Layout('g3_03', 'panh')
+      layer: =parent.ScreenMap.Layout('g3_03', 'layer')
+      bgcolorr: 0.25
+      bgcolorg: 0.25
+      bgcolorb: 0.25
+      bgalpha: 1
+      top: =parent.ScreenMap.SourceTOP('g3_03')
+      borderar: 0.3
+      borderag: 0.4
+      borderab: 0.9
+      leftborder: bordera
+      rightborder: bordera
+      bottomborder: bordera
+      topborder: bordera
+    position: [0, -400]
+- name: groups
+  type: tableDAT
+  position: [800, -200]
+  dat_content:
+  - - group
+    - panx
+    - pany
+    - panw
+    - panh
+  - - g1
+    - '217'
+    - '191'
+    - '438'
+    - '246'
+  - - g2
+    - '155'
+    - '118'
+    - '785'
+    - '442'
+  - - g3
+    - '623'
+    - '148'
+    - '532'
+    - '299'
+  dat_content_format: table
+- name: layout
+  type: tableDAT
+  flags:
+  - viewer
+  position: [800, 0]
+  dat_content:
+  - - name
+    - group
+    - tx
+    - ty
+    - sizeu
+    - sizev
+    - tz
+    - layer
+    - cropleft
+    - cropright
+    - cropbottom
+    - croptop
+    - panx
+    - pany
+    - panw
+    - panh
+  - - g1_01
+    - g1
+    - '-1.010796'
+    - '-0.445075'
+    - '0.9519'
+    - '0.5355'
+    - '-0.4'
+    - '1'
+    - '207'
+    - '867'
+    - '0'
+    - '371'
+    - '288'
+    - '191'
+    - '226'
+    - '127'
+  - - g1_02
+    - g1
+    - '-0.648567'
+    - '0.160855'
+    - '0.1868'
+    - '0.3321'
+    - '-0.05'
+    - '8'
+    - '723'
+    - '853'
+    - '490'
+    - '720'
+    - '464'
+    - '359'
+    - '44'
+    - '79'
+  - - g1_03
+    - g1
+    - '-0.536399'
+    - '-0.145743'
+    - '0.5977'
+    - '0.3362'
+    - '-0.15'
+    - '6'
+    - '659'
+    - '1073'
+    - '276'
+    - '509'
+    - '442'
+    - '286'
+    - '142'
+    - '80'
+  - - g2_01
+    - g2
+    - '0.186177'
+    - '0.302105'
+    - '0.5355'
+    - '0.9519'
+    - '-0.25'
+    - '4'
+    - '760'
+    - '967'
+    - '328'
+    - '695'
+    - '621'
+    - '319'
+    - '127'
+    - '226'
+  - - g2_02
+    - g2
+    - '-0.2713'
+    - '0.6735'
+    - '0.5977'
+    - '0.3362'
+    - '-0.2'
+    - '5'
+    - '571'
+    - '802'
+    - '590'
+    - '720'
+    - '505'
+    - '480'
+    - '142'
+    - '80'
+  - - g2_03
+    - g2
+    - '-1.069671'
+    - '-0.722368'
+    - '0.3362'
+    - '0.5977'
+    - '-0.3'
+    - '3'
+    - '313'
+    - '443'
+    - '0'
+    - '231'
+    - '347'
+    - '118'
+    - '80'
+    - '142'
+  - - g3_01
+    - g3
+    - '1.436941'
+    - '-0.579342'
+    - '0.9519'
+    - '0.5355'
+    - '-0.1'
+    - '7'
+    - '588'
+    - '1132'
+    - '27'
+    - '333'
+    - '868'
+    - '159'
+    - '226'
+    - '127'
+  - - g3_02
+    - g3
+    - '0.488443'
+    - '-0.726649'
+    - '0.5977'
+    - '0.3362'
+    - '0.35'
+    - '16'
+    - '148'
+    - '489'
+    - '0'
+    - '192'
+    - '685'
+    - '148'
+    - '142'
+    - '80'
+  - - g3_03
+    - g3
+    - '0.794834'
+    - '-0.109272'
+    - '0.5355'
+    - '0.9519'
+    - '-0.35'
+    - '2'
+    - '341'
+    - '646'
+    - '177'
+    - '720'
+    - '765'
+    - '221'
+    - '127'
+    - '226'
+  - - u01
+    - u
+    - '1.089971'
+    - '0.403591'
+    - '0.1868'
+    - '0.3321'
+    - '0'
+    - '9'
+    - ''
+    - ''
+    - ''
+    - ''
+    - '876'
+    - '416'
+    - '44'
+    - '79'
+  - - u02
+    - u
+    - '-1.302596'
+    - '-0.130788'
+    - '0.3321'
+    - '0.1868'
+    - '0.05'
+    - '10'
+    - ''
+    - ''
+    - ''
+    - ''
+    - '292'
+    - '307'
+    - '79'
+    - '44'
+  - - u03
+    - u
+    - '-0.935105'
+    - '0.097102'
+    - '0.1868'
+    - '0.3321'
+    - '0.1'
+    - '11'
+    - ''
+    - ''
+    - ''
+    - ''
+    - '396'
+    - '344'
+    - '44'
+    - '79'
+  - - u04
+    - u
+    - '1.377988'
+    - '-0.060049'
+    - '0.1868'
+    - '0.3321'
+    - '0.15'
+    - '12'
+    - ''
+    - ''
+    - ''
+    - ''
+    - '944'
+    - '306'
+    - '44'
+    - '79'
+  - - u05
+    - u
+    - '-0.25422'
+    - '-0.170112'
+    - '0.3362'
+    - '0.5977'
+    - '0.2'
+    - '13'
+    - ''
+    - ''
+    - ''
+    - ''
+    - '540'
+    - '249'
+    - '80'
+    - '142'
+  - - u06
+    - u
+    - '-0.575766'
+    - '-0.610982'
+    - '0.1868'
+    - '0.3321'
+    - '0.25'
+    - '14'
+    - ''
+    - ''
+    - ''
+    - ''
+    - '481'
+    - '176'
+    - '44'
+    - '79'
+  - - u07
+    - u
+    - '0.337644'
+    - '-0.452045'
+    - '0.5977'
+    - '0.3362'
+    - '0.3'
+    - '15'
+    - ''
+    - ''
+    - ''
+    - ''
+    - '649'
+    - '213'
+    - '142'
+    - '80'
+  dat_content_format: table
+- name: parexec
+  type: parameterexecuteDAT
+  parameters:
+    fromop: =parent()
+    op: ..
+  flags:
+  - viewer
+  position: [400, 400]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  dat_content: |
+    # Routes ScreenMap parameter events to _on<Par>Pulse / _on<Par>ValueChange handlers on the extension.
+
+    def _dispatch(suffix, *args):
+        par = args[0]
+        ext = parent.ScreenMap.ext.ScreenMap
+        handler = getattr(ext, '_on%s%s' % (par.name, suffix), None)
+        if handler is None:
+            return
+        try:
+            handler(*args)
+        except Exception as e:
+            debug('ScreenMap %s handler failed: %s' % (par.name, e))
+
+
+    def onValueChange(par, prev):
+        if par.name in ('Cmperunit', 'Panew', 'Paneh', 'Viewx', 'Viewy', 'Vieww'):
+            parent.ScreenMap.RebuildLayout()      # every derived value depends on these
+        _dispatch('ValueChange', par, prev)
+        return
+
+
+    def onPulse(par):
+        _dispatch('Pulse', par)
+        return
+
+
+    def onExpressionChange(par, val, prev):
+        return
+
+
+    def onExportChange(par, val, prev):
+        return
+
+
+    def onEnableChange(par, val, prev):
+        return
+
+
+    def onModeChange(par, val, prev):
+        return
+  dat_content_format: text
+- name: screens
+  type: tableDAT
+  flags:
+  - viewer
+  dat_content:
+  - - name
+    - group
+    - xcm
+    - ycm
+    - wcm
+    - hcm
+    - pxw
+    - pxh
+    - display
+    - depth
+  - - g1_01
+    - g1
+    - '-101.079613'
+    - '-44.50754'
+    - '95.19'
+    - '53.55'
+    - '0'
+    - '0'
+    - '0'
+    - '0'
+  - - g1_02
+    - g1
+    - '-64.856741'
+    - '16.085498'
+    - '18.68'
+    - '33.21'
+    - '0'
+    - '0'
+    - '0'
+    - '7'
+  - - g1_03
+    - g1
+    - '-53.639859'
+    - '-14.574316'
+    - '59.77'
+    - '33.62'
+    - '0'
+    - '0'
+    - '0'
+    - '5'
+  - - g2_01
+    - g2
+    - '18.617653'
+    - '30.210462'
+    - '53.55'
+    - '95.19'
+    - '0'
+    - '0'
+    - '0'
+    - '3'
+  - - g2_02
+    - g2
+    - '-27.13'
+    - '67.35'
+    - '59.77'
+    - '33.62'
+    - '0'
+    - '0'
+    - '0'
+    - '4'
+  - - g2_03
+    - g2
+    - '-106.967099'
+    - '-72.236826'
+    - '33.62'
+    - '59.77'
+    - '0'
+    - '0'
+    - '0'
+    - '2'
+  - - g3_01
+    - g3
+    - '143.694098'
+    - '-57.934156'
+    - '95.19'
+    - '53.55'
+    - '0'
+    - '0'
+    - '0'
+    - '6'
+  - - g3_02
+    - g3
+    - '48.844256'
+    - '-72.66492'
+    - '59.77'
+    - '33.62'
+    - '0'
+    - '0'
+    - '0'
+    - '15'
+  - - g3_03
+    - g3
+    - '79.483397'
+    - '-10.927229'
+    - '53.55'
+    - '95.19'
+    - '0'
+    - '0'
+    - '0'
+    - '1'
+  - - u01
+    - u
+    - '108.997148'
+    - '40.359068'
+    - '18.68'
+    - '33.21'
+    - '0'
+    - '0'
+    - '0'
+    - '8'
+  - - u02
+    - u
+    - '-130.259597'
+    - '-13.078783'
+    - '33.21'
+    - '18.68'
+    - '0'
+    - '0'
+    - '0'
+    - '9'
+  - - u03
+    - u
+    - '-93.510456'
+    - '9.71016'
+    - '18.68'
+    - '33.21'
+    - '0'
+    - '0'
+    - '0'
+    - '10'
+  - - u04
+    - u
+    - '137.798826'
+    - '-6.004929'
+    - '18.68'
+    - '33.21'
+    - '0'
+    - '0'
+    - '0'
+    - '11'
+  - - u05
+    - u
+    - '-25.422049'
+    - '-17.011217'
+    - '33.62'
+    - '59.77'
+    - '0'
+    - '0'
+    - '0'
+    - '12'
+  - - u06
+    - u
+    - '-57.576603'
+    - '-61.098153'
+    - '18.68'
+    - '33.21'
+    - '0'
+    - '0'
+    - '0'
+    - '13'
+  - - u07
+    - u
+    - '33.764413'
+    - '-45.204467'
+    - '59.77'
+    - '33.62'
+    - '0'
+    - '0'
+    - '0'
+    - '14'
+  dat_content_format: table
+- name: ScreenMapExt
+  type: textDAT
+  parameters:
+    language: python
+  flags:
+  - viewer
+  position: [0, 400]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  dat_content: |
+    from __future__ import annotations
+    from typing import Optional
+
+    # ScreenMapExt -- the screen layout tool.
+    #
+    # `screens` (table DAT, EDIT THIS ONE) is the single source of truth: one row per physical
+    # screen with its centre position and size in CENTIMETRES, its native pixel resolution and
+    # its output display index. Everything else is derived from it by RebuildLayout() into the
+    # `layout` table, which the mockup rectangles/crops in the Mockup COMP, the editor tiles and
+    # the Window COMPs read through Layout() / Px() / Display() expressions.
+    #
+    # World model: 1 world unit = Cmperunit centimetres (the mockup rectangles are in world
+    # units). Each interactive group's bounding box is fitted, centred, into a Panew x Paneh
+    # canvas (the group's hydra pane), which is what the per-screen crop pixels encode.
+
+    _PAGE = 'ScreenMap'
+    _SCREEN_COLS = ['name', 'group', 'xcm', 'ycm', 'wcm', 'hcm', 'pxw', 'pxh', 'display', 'depth']
+    _LAYOUT_COLS = ['name', 'group', 'tx', 'ty', 'sizeu', 'sizev', 'tz', 'layer',
+                    'cropleft', 'cropright', 'cropbottom', 'croptop',
+                    'panx', 'pany', 'panw', 'panh']
+    _TZ_STEP, _TZ_BASE = 0.05, -0.4     # depth 0 (the back) renders at tz -0.4; each step forward adds 0.05 world units
+    _UNCROPPED_GROUPS = ('u',)   # non-interactive screens keep their own centre crops of the clips
+    _GROUP_COLS = ['group', 'panx', 'pany', 'panw', 'panh']   # each interactive group's FULL canvas in editor pixels
+
+
+    def _ensurePage(comp: COMP, name: str) -> Page:
+        for page in comp.customPages:
+            if page.name == name:
+                return page
+        return comp.appendCustomPage(name)
+
+
+    def _ensurePar(comp: COMP, page: Page, name: str, style: str, **attrs) -> Par:
+        found = [p for p in comp.customPars if p.tupletName == name]
+        created = not found
+        if created:
+            getattr(page, 'append' + style)(name)
+            found = [p for p in comp.customPars if p.tupletName == name]
+        for p in found:
+            for key, value in attrs.items():
+                setattr(p, key, value)
+            if created and 'default' in attrs and style not in ('Pulse',):
+                p.val = attrs['default']
+        return found[0]
+
+
+    class ScreenMapExt:
+        def __init__(self, ownerComp: COMP) -> None:
+            self.ownerComp = ownerComp
+            self._ensurePars()
+            self._ensureTables()
+
+        def onInitTD(self) -> None:
+            run('args[0].RebuildLayout()', self, delayFrames=5)
+
+        def onDestroyTD(self) -> None:
+            pass
+
+        # ---- schema ------------------------------------------------------------------
+        def _ensurePars(self) -> None:
+            c = self.ownerComp
+            page = _ensurePage(c, _PAGE)
+            _ensurePar(c, page, 'Mockup', 'COMP', label='Mockup COMP', default='base1',
+                       help='The COMP holding the mockup: rect_<screen> rectangle POPs and crop_<screen> Crop TOPs that this tool drives, plus the crop_paneN group canvases.')
+            _ensurePar(c, page, 'Cmperunit', 'Float', label='cm per World Unit', default=100.0, min=0.001, clampMin=True, normMin=1, normMax=200,
+                       help='How many centimetres one world unit of the mockup represents. The rectangles are sized as cm / this value. 100 means 1 unit = 1 m.')
+            _ensurePar(c, page, 'Panew', 'Int', label='Group Canvas Width', default=1280, min=1, clampMin=True, normMax=3840,
+                       help='Pixel width of each interactive group canvas (the hydra pane the crops cut from).')
+            _ensurePar(c, page, 'Paneh', 'Int', label='Group Canvas Height', default=720, min=1, clampMin=True, normMax=2160,
+                       help='Pixel height of each interactive group canvas.')
+            _ensurePar(c, page, 'Viewx', 'Float', label='Editor View Centre X', default=0.0, normMin=-5, normMax=5, startSection=True,
+                       help='World-unit X at the centre of the editor panel.')
+            _ensurePar(c, page, 'Viewy', 'Float', label='Editor View Centre Y', default=0.0, normMin=-5, normMax=5,
+                       help='World-unit Y at the centre of the editor panel.')
+            _ensurePar(c, page, 'Vieww', 'Float', label='Editor View Width', default=5.4, min=0.1, clampMin=True, normMin=1, normMax=20,
+                       help='How many world units the editor panel spans horizontally. Smaller = zoomed in.')
+            _ensurePar(c, page, 'Snapcm', 'Float', label='Drag Snap (cm)', default=0.0, min=0, clampMin=True, normMax=50,
+                       help='Dragged screen positions snap to multiples of this many cm. 0 = no snapping.')
+            _ensurePar(c, page, 'Ghostopacity', 'Float', label='Hover Ghost Opacity', default=0.15, min=0, max=1, clampMin=True, clampMax=True,
+                       help='Opacity of the full group canvas (the whole hydra pane) shown behind a group while the cursor is over one of its screens in the editor.')
+            _ensurePar(c, page, 'Rebuild', 'Pulse', label='Rebuild Layout', startSection=True,
+                       help='Recompute the layout table from the screens table. Normally automatic on every table edit.')
+
+        def _ensureTables(self) -> None:
+            c = self.ownerComp
+            screens = c.op('screens')
+            if screens is None:
+                screens = c.create(tableDAT, 'screens')
+                screens.nodeX, screens.nodeY = 0, 0
+                screens.clear()
+                screens.appendRow(_SCREEN_COLS)
+            layout = c.op('layout')
+            if layout is None:
+                layout = c.create(tableDAT, 'layout')
+                layout.nodeX, layout.nodeY = 400, 0
+            if layout.numRows == 0:
+                layout.appendRow(_LAYOUT_COLS)
+            groups = c.op('groups')
+            if groups is None:
+                groups = c.create(tableDAT, 'groups')
+                groups.nodeX, groups.nodeY = 800, -200
+            if groups.numRows == 0:
+                groups.appendRow(_GROUP_COLS)
+
+        # ---- public API (read by expressions on the mockup, editor and Window COMPs) ----
+        def Screens(self) -> list:
+            """Names of every screen in the screens table, in table order."""
+            t = self.ownerComp.op('screens')
+            return [t[r, 'name'].val for r in range(1, t.numRows)]
+
+        def Group(self, name: str) -> str:
+            """Group id of a screen (g1, g2, g3 or u)."""
+            t = self.ownerComp.op('screens')
+            cell = t[name, 'group']
+            return cell.val if cell is not None else ''
+
+        def Layout(self, name: str, col: str) -> float:
+            """A derived layout value for a screen: tx ty sizeu sizev (world units), cropleft cropright cropbottom croptop (canvas px), panx pany panw panh (editor px)."""
+            cell = self.ownerComp.op('layout')[name, col]
+            if cell is None or cell.val == '':
+                return 0.0
+            return float(cell.val)
+
+        def Px(self, name: str, axis: str) -> int:
+            """Native pixel size of a screen along 'w' or 'h'; 0 when unknown."""
+            cell = self.ownerComp.op('screens')[name, 'pxw' if axis == 'w' else 'pxh']
+            try:
+                return int(float(cell.val)) if cell is not None else 0
+            except ValueError:
+                return 0
+
+        def Display(self, name: str) -> int:
+            """Output display index for a screen's Window COMP."""
+            cell = self.ownerComp.op('screens')[name, 'display']
+            try:
+                return int(float(cell.val)) if cell is not None else 0
+            except ValueError:
+                return 0
+
+        def SourceTOP(self, name: str) -> Optional[TOP]:
+            """The mockup crop TOP showing this screen's content (crop_<name> in the Mockup COMP)."""
+            mock = self.ownerComp.par.Mockup.eval()
+            return mock.op('crop_' + name) if mock is not None else None
+
+        def RebuildLayout(self) -> None:
+            """Derive the layout table (world units, canvas crop pixels, editor pixels) from the screens table."""
+            c = self.ownerComp
+            screens, layout = c.op('screens'), c.op('layout')
+            unit = float(c.par.Cmperunit.eval())
+            panew, paneh = float(c.par.Panew.eval()), float(c.par.Paneh.eval())
+            rows = []
+            for r in range(1, screens.numRows):
+                try:
+                    depth = int(float(screens[r, 'depth'])) if screens[r, 'depth'] is not None and screens[r, 'depth'].val != '' else 0
+                    rows.append({
+                        'name': screens[r, 'name'].val, 'group': screens[r, 'group'].val,
+                        'tx': float(screens[r, 'xcm']) / unit, 'ty': float(screens[r, 'ycm']) / unit,
+                        'sizeu': float(screens[r, 'wcm']) / unit, 'sizev': float(screens[r, 'hcm']) / unit,
+                        'tz': _TZ_BASE + depth * _TZ_STEP,   # mockup Z: depth 0 is the back
+                        'layer': depth + 1,                  # editor tile layer: ghosts sit at 0, tiles above
+                    })
+                except (ValueError, TypeError) as e:
+                    debug('screens row %d skipped: %s' % (r, e))
+            # per-group fit into the canvas
+            groups = {}
+            for s in rows:
+                groups.setdefault(s['group'], []).append(s)
+            for g, members in groups.items():
+                if g in _UNCROPPED_GROUPS:
+                    continue
+                minx = min(s['tx'] - s['sizeu'] / 2 for s in members)
+                maxx = max(s['tx'] + s['sizeu'] / 2 for s in members)
+                miny = min(s['ty'] - s['sizev'] / 2 for s in members)
+                maxy = max(s['ty'] + s['sizev'] / 2 for s in members)
+                bw, bh = max(maxx - minx, 1e-9), max(maxy - miny, 1e-9)
+                scale = min(panew / bw, paneh / bh)
+                offx, offy = (panew - bw * scale) / 2, (paneh - bh * scale) / 2
+                for s in members:
+                    s['cropleft'] = round(offx + (s['tx'] - s['sizeu'] / 2 - minx) * scale)
+                    s['cropright'] = round(offx + (s['tx'] + s['sizeu'] / 2 - minx) * scale)
+                    s['cropbottom'] = round(offy + (s['ty'] - s['sizev'] / 2 - miny) * scale)
+                    s['croptop'] = round(offy + (s['ty'] + s['sizev'] / 2 - miny) * scale)
+                # the whole canvas, in world units: the fitted bbox plus the letterbox margins
+                groups[g] = {'cx': (minx + maxx) / 2, 'cy': (miny + maxy) / 2, 'w': panew / scale, 'h': paneh / scale}
+            # editor panel pixels (panel origin bottom-left, Y up)
+            editor = c.op('editor')
+            ew = float(editor.par.w.eval()) if editor is not None else panew
+            eh = float(editor.par.h.eval()) if editor is not None else paneh
+            vieww = float(c.par.Vieww.eval())
+            ppu = ew / vieww
+            left = float(c.par.Viewx.eval()) - vieww / 2
+            bottom = float(c.par.Viewy.eval()) - (eh / ppu) / 2
+            for s in rows:
+                s['panx'] = round((s['tx'] - s['sizeu'] / 2 - left) * ppu)
+                s['pany'] = round((s['ty'] - s['sizev'] / 2 - bottom) * ppu)
+                s['panw'] = max(1, round(s['sizeu'] * ppu))
+                s['panh'] = max(1, round(s['sizev'] * ppu))
+            out = [_LAYOUT_COLS] + [[self._fmt(s.get(col, '')) for col in _LAYOUT_COLS] for s in rows]
+            layout.clear()
+            layout.appendRows(out)
+            gout = [_GROUP_COLS]
+            for g, box in groups.items():
+                if not isinstance(box, dict):
+                    continue
+                gout.append([g, self._fmt(round((box['cx'] - box['w'] / 2 - left) * ppu)),
+                             self._fmt(round((box['cy'] - box['h'] / 2 - bottom) * ppu)),
+                             self._fmt(max(1, round(box['w'] * ppu))), self._fmt(max(1, round(box['h'] * ppu)))])
+            gtable = c.op('groups')
+            gtable.clear()
+            gtable.appendRows(gout)
+
+        def GroupLayout(self, group: str, col: str) -> float:
+            """The full canvas of an interactive group in editor pixels: panx pany panw panh."""
+            cell = self.ownerComp.op('groups')[group, col]
+            if cell is None or cell.val == '':
+                return 0.0
+            return float(cell.val)
+
+        def GroupTOP(self, group: str) -> Optional[TOP]:
+            """The group's whole hydra pane (crop_paneN in the Mockup COMP), the visual its screens are windows into."""
+            mock = self.ownerComp.par.Mockup.eval()
+            if mock is None or not group.startswith('g'):
+                return None
+            return mock.op('crop_pane' + group[1:])
+
+        def GroupHovered(self, group: str) -> bool:
+            """True while the cursor is over any editor tile of this group (drives the hover ghost)."""
+            editor = self.ownerComp.op('editor')
+            if editor is None:
+                return False
+            t = self.ownerComp.op('screens')
+            for r in range(1, t.numRows):
+                if t[r, 'group'].val != group:
+                    continue
+                tile = editor.op('screen_' + t[r, 'name'].val)
+                if tile is not None and tile.panel.inside:
+                    return True
+            return False
+
+        # ---- wiring (called by this COMP's own DATs) ---------------------------------------
+        def setScreenPosition(self, name: str, xcm: float, ycm: float) -> None:
+            """Move a screen's centre (cm); used by the editor drag. Snaps to Snapcm when set."""
+            snap = float(self.ownerComp.par.Snapcm.eval())
+            if snap > 0:
+                xcm, ycm = round(xcm / snap) * snap, round(ycm / snap) * snap
+            t = self.ownerComp.op('screens')
+            if t[name, 'xcm'] is None:
+                debug('setScreenPosition: no screen named %r' % name)
+                return
+            t[name, 'xcm'] = self._fmt(xcm)
+            t[name, 'ycm'] = self._fmt(ycm)
+
+        def sendToBack(self, name: str) -> None:
+            """Make a screen render behind every other one (right-click in the editor): it gets depth 0, the rest keep their order above it."""
+            t = self.ownerComp.op('screens')
+            if t[name, 'depth'] is None:
+                debug('sendToBack: no screen named %r' % name)
+                return
+            order = []
+            for r in range(1, t.numRows):
+                n = t[r, 'name'].val
+                try:
+                    d = int(float(t[r, 'depth']))
+                except (ValueError, TypeError):
+                    d = 0
+                order.append((d, n))
+            order.sort()
+            ranked = [n for _, n in order if n != name]
+            t[name, 'depth'] = '0'
+            for i, n in enumerate(ranked):
+                t[n, 'depth'] = str(i + 1)
+
+        def editorToCm(self, u: float, v: float) -> tuple:
+            """Editor panel position (0..1 u/v) -> world position in cm."""
+            c = self.ownerComp
+            editor = c.op('editor')
+            ew = float(editor.par.w.eval()) if editor is not None else float(c.par.Panew.eval())
+            eh = float(editor.par.h.eval()) if editor is not None else float(c.par.Paneh.eval())
+            vieww = float(c.par.Vieww.eval())
+            ppu = ew / vieww
+            unit = float(c.par.Cmperunit.eval())
+            x = float(c.par.Viewx.eval()) - vieww / 2 + u * ew / ppu
+            y = float(c.par.Viewy.eval()) - (eh / ppu) / 2 + v * eh / ppu
+            return x * unit, y * unit
+
+        def _onRebuildPulse(self, par: Par) -> None:
+            self.RebuildLayout()
+
+        @staticmethod
+        def _fmt(v) -> str:
+            if isinstance(v, float):
+                return ('%.6f' % v).rstrip('0').rstrip('.') if v != int(v) else str(int(v))
+            return str(v)
+  dat_content_format: text
+- name: screens_exec
+  type: datexecuteDAT
+  parameters:
+    fromop: =parent()
+    dat: screens
+  flags:
+  - viewer
+  position: [400, 0]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  dat_content: |
+    # Any edit to the screens table (a typed cm value, a drag in the editor) re-derives the layout table.
+
+    def onTableChange(dat):
+        parent.ScreenMap.RebuildLayout()
+        return
+
+    def onRowChange(dat, rows):
+        return
+
+    def onColChange(dat, cols):
+        return
+
+    def onCellChange(dat, cells, prev):
+        return
+
+    def onSizeChange(dat):
+        return
+  dat_content_format: text
+- name: window_editor
+  type: windowCOMP
+  parameters:
+    winop: editor
+    title: ScreenMap editor
+    display: 1
+  flags:
+  - viewer
+  position: [1600, 0]
+  size: [160, 130]
+  color: [0.67, 0.67, 0.67]
+annotations:
+- name: annotate1
+  mode: annotate
+  title: 'ScreenMap: physical screen layout'
+  text: 'screens (EDIT THIS TABLE) is the single source of truth: one row per screen -- centre xcm/ycm and size wcm/hcm in centimetres, native pxw/pxh (0 = unknown), output display index, depth (stacking order: 0 = the back). screens_exec re-derives the layout and groups tables on every edit; layout holds world units (cm / Cmperunit), tz/layer from depth, the per-group crop pixels (group bounding box fitted and centred into the Panew x Paneh hydra pane) and the editor pixels; groups holds each interactive group''s whole canvas in editor pixels. The mockup in base1 (rect_* incl. tz, crop_g*) and window_u* read layout via op.ScreenMap.Layout / Px / Display expressions. editor: left-drag a screen tile to move it (Snapcm snaps); right-click a tile to send that screen to the back (rclick_exec); hovering a group''s tile reveals the group''s full hydra pane behind it at Ghostopacity (ghost_g1..3); open it with window_editor. Viewx/Viewy/Vieww frame the editor view. parexec routes parameter changes to the extension.'
+  position: [-70, -270]
+  size: [1900, 930]
+  color: [0.25, 0.35, 0.45]

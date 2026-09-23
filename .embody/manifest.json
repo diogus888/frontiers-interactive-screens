@@ -1,0 +1,52 @@
+{
+  "files_appended": [
+    {
+      "kind": "json_key",
+      "marker": "mcpServers.envoy",
+      "path": ".mcp.json"
+    },
+    {
+      "kind": "json_key",
+      "marker": "permissions (Envoy tools + temp read dirs + worktree access)",
+      "path": ".claude/settings.local.json"
+    }
+  ],
+  "files_created": [
+    "AGENTS.md",
+    ".claude/rules/network-layout.md",
+    ".claude/rules/td-python.md",
+    ".claude/rules/mcp-safety.md",
+    ".claude/rules/parameters.md",
+    ".claude/rules/performance.md",
+    ".claude/rules/td-connectivity.md",
+    ".claude/rules/multi-session.md",
+    ".claude/rules/worktree-td-safety.md",
+    ".claude/rules/tdxn-economy.md",
+    ".claude/skills/create-operator/SKILL.md",
+    ".claude/skills/debug-operator/SKILL.md",
+    ".claude/skills/externalize-operator/SKILL.md",
+    ".claude/skills/create-extension/SKILL.md",
+    ".claude/skills/manage-annotations/SKILL.md",
+    ".claude/skills/td-api-reference/SKILL.md",
+    ".claude/skills/movie-export/SKILL.md",
+    ".claude/skills/parameter-design/SKILL.md",
+    ".claude/skills/td-recovery/SKILL.md",
+    ".claude/skills/multi-session-etiquette/SKILL.md",
+    ".claude/skills/mcp-tools-reference/SKILL.md",
+    ".claude/skills/pop-networks/SKILL.md",
+    ".claude/skills/visual-aesthetics/SKILL.md",
+    ".claude/skills/brief/SKILL.md",
+    ".claude/skills/merge-divergent-tox/SKILL.md",
+    "CLAUDE.md",
+    "TDPyEnvManagerContext.yaml",
+    ".mcp.json",
+    ".claude/settings.local.json"
+  ],
+  "git_config": [],
+  "network_ops": [],
+  "venv": {
+    "created": true,
+    "path": ".venv"
+  },
+  "version": 1
+}

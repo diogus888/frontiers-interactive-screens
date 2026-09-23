@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hydra · Pi sandbox</title>
+  <script src="vendor/hydra-synth.js"></script>
+  <script src="presets.js"></script>
+  <style>
+    :root {
+      --bg: rgba(10, 10, 12, 0.86);
+      --fg: #e8e8e8;
+      --dim: #8a8a8a;
+      --line: rgba(255,255,255,0.12);
+      --accent: #b8ff4a;
+      --warn: #ffcc4a;
+      --bad: #ff5a5a;
+      font-size: 12px;
+    }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+    body { font: 12px/1.45 Menlo, Consolas, "SF Mono", monospace; color: var(--fg); }
+    #stage { position: fixed; inset: 0; background: #000; }
+    #stage canvas { display: block; width: 100%; height: 100%; object-fit: cover; background: #000; }
+    body.pixelated #stage canvas { image-rendering: pixelated; }
+
+    /* ---- HUD --------------------------------------------------------- */
+    #hud {
+      position: fixed; top: 10px; left: 10px; z-index: 10;
+      padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px;
+      pointer-events: none; min-width: 210px;
+    }
+    #hud[hidden] { display: none; }
+    #hud .big { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+    #hud .big small { font-size: 11px; font-weight: 400; color: var(--dim); margin-left: 6px; }
+    #hud .row { display: flex; justify-content: space-between; gap: 14px; color: var(--dim); }
+    #hud .row b { color: var(--fg); font-weight: 500; }
+    #spark { display: block; width: 210px; height: 36px; margin-top: 6px; image-rendering: pixelated; }
+    #hud .good { color: var(--accent); } #hud .meh { color: var(--warn); } #hud .bad { color: var(--bad); }
+    #benchbar { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); color: var(--warn); }
+    #benchbar[hidden] { display: none; }
+
+    /* ---- Panel ------------------------------------------------------- */
+    #panel {
+      position: fixed; top: 10px; right: 10px; bottom: 10px; width: 330px; z-index: 11;
+      background: var(--bg); border: 1px solid var(--line); border-radius: 4px;
+      overflow-y: auto; overflow-x: hidden; backdrop-filter: blur(6px);
+      padding: 12px 14px 20px; box-sizing: border-box;
+    }
+    #panel[hidden] { display: none; }
+    #panel h1 { font-size: 12px; font-weight: 700; margin: 0 0 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+    #panel h2 { font-size: 11px; font-weight: 600; margin: 16px 0 6px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+    .field { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 6px 10px; margin: 4px 0; }
+    .field label { color: var(--dim); }
+    select, input[type=number], input[type=text], button, textarea {
+      font: inherit; color: var(--fg); background: #1a1a1e; border: 1px solid var(--line); border-radius: 3px;
+      padding: 4px 6px; box-sizing: border-box; width: 100%;
+    }
+    select:focus, input:focus, button:focus { outline: 1px solid var(--accent); }
+    button { cursor: pointer; }
+    button:hover { border-color: rgba(255,255,255,0.35); }
+    button.primary { background: var(--accent); color: #000; border-color: transparent; font-weight: 700; }
+    button.danger { color: var(--bad); }
+    .toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+    .toggles label { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 3px 0; }
+    .toggles input { margin: 0; accent-color: var(--accent); }
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+    .btns .wide { grid-column: 1 / -1; }
+    .hint { color: var(--dim); margin: 4px 0 0; }
+    .hint kbd { color: var(--fg); background: #222; border: 1px solid var(--line); border-radius: 2px; padding: 0 4px; }
+    #info { color: var(--dim); white-space: pre-wrap; word-break: break-word; margin: 0; }
+    #info b { color: var(--fg); font-weight: 500; }
+    #results { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    #results th, #results td { text-align: right; padding: 2px 4px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    #results th { color: var(--dim); font-weight: 500; }
+    #results td:first-child, #results th:first-child { text-align: left; }
+    #results .good { color: var(--accent); } #results .meh { color: var(--warn); } #results .bad { color: var(--bad); }
+    .results-wrap { overflow-x: auto; }
+    textarea { height: 90px; resize: vertical; white-space: pre; font-size: 10px; }
+    details summary { cursor: pointer; color: var(--dim); margin-top: 14px; }
+    pre#src { font-size: 10px; line-height: 1.35; white-space: pre; overflow-x: auto; color: var(--dim); max-height: 300px; overflow-y: auto; margin: 6px 0 0; }
+
+    #err { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; padding: 8px 12px; color: #f66; background: rgba(0,0,0,0.85); font: 12px/1.4 monospace; white-space: pre-wrap; z-index: 20; }
+    #err[hidden] { display: none; }
+    #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 6px 12px; background: var(--accent); color: #000; border-radius: 3px; z-index: 30; font-weight: 600; transition: opacity .3s; opacity: 0; pointer-events: none; }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body class="pixelated">
+  <div id="stage"></div>
+
+  <!-- ---- live HUD ---------------------------------------------------- -->
+  <div id="hud">
+    <div class="big"><span id="h-fps">--</span><small>fps page</small></div>
+    <div class="row"><span>render fps</span><b id="h-rfps">--</b></div>
+    <div class="row"><span>frame ms avg / max</span><b id="h-frame">--</b></div>
+    <div class="row"><span>tick cpu ms avg / max</span><b id="h-tick">--</b></div>
+    <div class="row"><span>render</span><b id="h-res">--</b></div>
+    <div class="row"><span>passes · Mpx/frame</span><b id="h-load">--</b></div>
+    <div class="row"><span>preset · stages</span><b id="h-cfg">--</b></div>
+    <div class="row"><span>startup load / compile</span><b id="h-start">--</b></div>
+    <canvas id="spark" width="210" height="36"></canvas>
+    <div id="benchbar" hidden></div>
+  </div>
+
+  <!-- ---- control panel ----------------------------------------------- -->
+  <div id="panel">
+    <h1>Pi feasibility sandbox</h1>
+
+    <div class="field">
+      <label for="f-target">Target device</label>
+      <div style="display:flex;gap:6px">
+        <select id="f-target">
+          <option value="pi3">low budget · Pi Zero 2 W / Pi 3</option>
+          <option value="pi4">Pi 4</option>
+          <option value="pi5">Pi 5</option>
+          <option value="desktop">desktop / laptop</option>
+        </select>
+        <button id="b-target" style="width:auto;white-space:nowrap">Apply</button>
+      </div>
+      <label></label>
+      <p class="hint" id="target-note" style="margin:0"></p>
+
+      <label for="f-preset">Preset</label>
+      <select id="f-preset"></select>
+
+      <label for="f-res">Render res</label>
+      <select id="f-res">
+        <option value="144">144p short side</option>
+        <option value="180">180p short side</option>
+        <option value="270">270p short side</option>
+        <option value="360">360p short side</option>
+        <option value="480">480p short side</option>
+        <option value="540">540p short side</option>
+        <option value="720">720p short side</option>
+        <option value="1080">1080p short side</option>
+        <option value="native">native (window px)</option>
+        <option value="640x360">640×360 fixed</option>
+        <option value="1280x720">1280×720 fixed</option>
+        <option value="1920x1080">1920×1080 fixed</option>
+      </select>
+
+      <label for="f-precision">Precision</label>
+      <select id="f-precision">
+        <option value="lowp">lowp</option>
+        <option value="mediump">mediump</option>
+        <option value="highp">highp</option>
+      </select>
+
+      <label for="f-fps">FPS cap</label>
+      <select id="f-fps">
+        <option value="0">uncapped</option>
+        <option value="60">60</option>
+        <option value="30">30</option>
+        <option value="24">24</option>
+        <option value="20">20</option>
+        <option value="15">15</option>
+      </select>
+
+      <label for="f-view">View stage</label>
+      <select id="f-view">
+        <option value="o3">o3 · final</option>
+        <option value="o2">o2 · colour</option>
+        <option value="o1">o1 · merge</option>
+        <option value="o5">o5 · green sort</option>
+        <option value="o4">o4 · layer 1</option>
+        <option value="o6">o6 · layer 2</option>
+        <option value="o0">o0 · layer 3</option>
+      </select>
+
+      <label for="f-libs">Shader libs</label>
+      <select id="f-libs">
+        <option value="local">local (vendor/, offline)</option>
+        <option value="cdn">original CDN URLs</option>
+      </select>
+    </div>
+
+    <h2>Stages (removed from the sketch when off)</h2>
+    <div class="toggles">
+      <label><input type="checkbox" id="f-sort"> pixel sort <span class="hint">(S)</span></label>
+      <label><input type="checkbox" id="f-green"> green pixels <span class="hint">(G)</span></label>
+      <label><input type="checkbox" id="f-post"> post-processing <span class="hint">(O)</span></label>
+      <label><input type="checkbox" id="f-l3"> layer 3 octaves <span class="hint">(L)</span></label>
+      <label><input type="checkbox" id="f-smooth"> smooth upscale</label>
+      <label><input type="checkbox" id="f-hud"> show HUD <span class="hint">(H)</span></label>
+    </div>
+
+    <div class="btns">
+      <button id="b-restart">Restart (R)</button>
+      <button id="b-full">Fullscreen (F)</button>
+      <button id="b-link" class="wide">Copy link with these settings</button>
+    </div>
+    <p class="hint"><kbd>P</kbd> hide/show this panel · <kbd>1</kbd>–<kbd>7</kbd> presets · <kbd>[</kbd> <kbd>]</kbd> resolution · <kbd>B</kbd> benchmark</p>
+
+    <h2>Benchmark</h2>
+    <div class="field">
+      <label for="f-device">Device label</label>
+      <input type="text" id="f-device" placeholder="e.g. Pi 4 4GB · Pi 5 · laptop" autocomplete="off">
+      <label for="f-bmode">Mode</label>
+      <select id="f-bmode">
+        <option value="ladder">resolution ladder</option>
+        <option value="ablation">stage ablation (at current res)</option>
+        <option value="both">ladder then ablation</option>
+      </select>
+      <label for="f-bscope">Presets</label>
+      <select id="f-bscope">
+        <option value="current">current preset only</option>
+        <option value="all">all presets</option>
+      </select>
+      <label for="f-bsec">Seconds / step</label>
+      <input type="number" id="f-bsec" min="3" max="60" step="1" value="6">
+      <label for="f-bstop">Stop ladder below</label>
+      <input type="number" id="f-bstop" min="0" max="60" step="1" value="12">
+    </div>
+    <div class="btns">
+      <button id="b-bench" class="primary">Run benchmark (B)</button>
+      <button id="b-bstop" class="danger">Stop</button>
+      <button id="b-copy" >Copy CSV</button>
+      <button id="b-clear">Clear results</button>
+    </div>
+    <div class="results-wrap">
+      <table id="results" hidden>
+        <thead><tr>
+          <th>device</th><th>preset</th><th>res</th><th>stages</th><th>fps</th><th>1% low</th><th>tick ms</th><th>compile ms</th><th>verdict</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <textarea id="csv" readonly hidden></textarea>
+
+    <h2>Device</h2>
+    <pre id="info">…</pre>
+
+    <details>
+      <summary>Sketch source as run (after toggles)</summary>
+      <pre id="src"></pre>
+    </details>
+  </div>
+
+  <pre id="err" hidden></pre>
+  <div id="toast"></div>
+
+  <script>
+  // ======================================================================
+  //  CONFIG  — lives in the URL so a Pi kiosk can autostart any state:
+  //  ?preset=preset-1&res=360&precision=mediump&fps=0&sort=1&green=1&post=1
+  //   &l3=full&view=o3&libs=local&smooth=0&hud=1&panel=1&bench=ladder
+  // ======================================================================
+  const $ = (id) => document.getElementById(id)
+  const PRESETS = window.PRESETS || []
+  const LADDER_ALL = ['144', '180', '270', '360', '480', '540', '720', '1080']
+  let LADDER = LADDER_ALL.slice()
+
+  // Starting points per device class. VideoCore IV (Zero 2 W / Pi 3) has a fraction of the
+  // fill rate of the Pi 4's VideoCore VI, which is again well behind the Pi 5. These are
+  // sensible first guesses — the benchmark is what actually decides.
+  const PROFILES = {
+    pi3:     { cfg: { res: '180', precision: 'lowp',    fps: 24, sort: 0, green: 0, post: 0, l3: 'single' }, ladderMax: '360',
+               note: 'VideoCore IV, 512 MB–1 GB RAM. Expect only the lite chain at ≤270p; Chromium itself is tight on a Zero 2 W. Try lowp first, then each stage back on.' },
+    pi4:     { cfg: { res: '270', precision: 'mediump', fps: 30, sort: 1, green: 1, post: 0, l3: 'single' }, ladderMax: '540',
+               note: 'VideoCore VI. 270p–360p with a 30 fps cap is the realistic target; post-processing is the first thing to drop.' },
+    pi5:     { cfg: { res: '360', precision: 'mediump', fps: 30, sort: 1, green: 1, post: 1, l3: 'full' },  ladderMax: '720',
+               note: 'VideoCore VII. Full chain at 360p should hold 30; run the ladder to see how far past 540p it goes.' },
+    desktop: { cfg: { res: 'native', precision: 'mediump', fps: 0, sort: 1, green: 1, post: 1, l3: 'full' }, ladderMax: '1080',
+               note: 'Reference: full chain, native resolution, uncapped.' },
+  }
+  function applyProfile(name, restart = true) {
+    const p = PROFILES[name]; if (!p) return
+    cfg.target = name
+    Object.assign(cfg, p.cfg)
+    LADDER = LADDER_ALL.slice(0, LADDER_ALL.indexOf(p.ladderMax) + 1)
+    $('target-note').textContent = p.note + ` Ladder runs up to ${p.ladderMax}p.`
+    syncURL(); applyCfgToForm()
+    if (restart) startHydra()
+  }
+
+  const DEFAULTS = {
+    preset: PRESETS[0] ? PRESETS[0].id : '',
+    res: '360', precision: 'mediump', fps: 0,
+    sort: 1, green: 1, post: 1, l3: 'full',
+    view: 'o3', libs: 'local', smooth: 0, hud: 1, panel: 1, target: 'desktop',
+  }
+  const cfg = { ...DEFAULTS }
+  const q = new URLSearchParams(location.search)
+  for (const k of Object.keys(DEFAULTS)) {
+    if (!q.has(k)) continue
+    const v = q.get(k)
+    cfg[k] = typeof DEFAULTS[k] === 'number' ? Number(v) : v
+  }
+  if (!PRESETS.find(p => p.id === cfg.preset)) cfg.preset = DEFAULTS.preset
+
+  // settings that need a full hydra rebuild when they change
+  const REBUILD_KEYS = ['preset', 'res', 'precision', 'sort', 'green', 'post', 'l3', 'libs']
+
+  function syncURL() {
+    const p = new URLSearchParams()
+    for (const k of Object.keys(DEFAULTS)) if (String(cfg[k]) !== String(DEFAULTS[k])) p.set(k, cfg[k])
+    const s = p.toString()
+    history.replaceState(null, '', location.pathname + (s ? '?' + s : ''))
+  }
+
+  // ======================================================================
+  //  SOURCE TRANSFORMS — every preset shares the same block structure, so
+  //  stages are switched off by editing the sketch text before eval.
+  // ======================================================================
+  const VENDOR = {
+    'https://metagrowing.org/extra-shaders-for-hydra/lib-noise.js': 'vendor/lib-noise.js',
+    'https://metagrowing.org/extra-shaders-for-hydra/lib-screen.js': 'vendor/lib-screen.js',
+    'https://cdn.jsdelivr.net/gh/geikha/hyper-hydra@latest/hydra-blend.js': 'vendor/hydra-blend.js',
+    'https://cdn.jsdelivr.net/gh/geikha/hyper-hydra@latest/hydra-arithmetics.js': 'vendor/hydra-arithmetics.js',
+  }
+
+  function transform(source, c) {
+    let s = source.replace(/\r\n/g, '\n')
+    if (c.libs === 'local') for (const [u, l] of Object.entries(VENDOR)) s = s.split(u).join(l)
+    // post-processing off: o3 becomes a plain copy of the colour layer (+ green pixels if on)
+    if (!Number(c.post)) s = s.replace(/src\(o2\)\n[\s\S]*?\.out\(o3\)/, 'src(o2)\n  .layer(greenPixels())\n  .out(o3)')
+    // green pixels off: drop the o5 feedback chain and the final .layer()
+    if (!Number(c.green)) {
+      s = s.replace(/^[ \t]*\.layer\(greenPixels\(\)\)[ \t]*\n/gm, '')
+      s = s.replace(/src\(o5\)\n[\s\S]*?\.out\(o5\)\n/, '')
+    }
+    // pixel sorting off: remove the pysort / pxsort lines
+    if (!Number(c.sort)) s = s.replace(/^[ \t]*\.p[xy]sort\(.*\)[ \t]*\n/gm, '')
+    // layer 3: keep only the first unoise octave
+    if (c.l3 === 'single') s = s.replace(/^[ \t]*\.darken\(unoise.*\)[ \t]*\n/gm, '')
+    // which output to show
+    if (c.view && c.view !== 'o3') s = s.replace(/render\(o3\)/, `render(${c.view})`)
+    return s
+  }
+  const countPasses = (s) => (s.match(/\.out\(o\d\)/g) || []).length + 1 // +1 final blit
+
+  // ======================================================================
+  //  RESOLUTION
+  // ======================================================================
+  function computeRes(c) {
+    const W = window.innerWidth, H = window.innerHeight
+    if (c.res === 'native') return [W, H]
+    const m = /^(\d+)x(\d+)$/.exec(c.res)
+    if (m) return [+m[1], +m[2]]
+    const s = parseInt(c.res, 10) || 360
+    const ar = W / H
+    let w, h
+    if (ar >= 1) { h = s; w = Math.round(s * ar) } else { w = s; h = Math.round(s / ar) }
+    return [Math.max(2, w & ~1), Math.max(2, h & ~1)]
+  }
+
+  // ======================================================================
+  //  HYDRA LIFECYCLE — we drive the tick ourselves (autoLoop:false) so we can
+  //  time it, cap it, and tear it down cleanly when settings change.
+  // ======================================================================
+  let hydra = null, canvas = null, gl = null, rafId = 0, running = false
+  let lastNow = 0, firstTick = true
+  let startup = { loadMs: 0, compileMs: 0 }
+  let currentSource = '', currentPasses = 0, currentRes = [0, 0]
+  let generation = 0
+
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor
+
+  function stopHydra() {
+    running = false
+    cancelAnimationFrame(rafId)
+    if (hydra) {
+      try { hydra.regl.destroy() } catch (e) {}
+      try { const ext = gl && gl.getExtension('WEBGL_lose_context'); ext && ext.loseContext() } catch (e) {}
+    }
+    if (canvas) canvas.remove()
+    hydra = null; canvas = null; gl = null
+  }
+
+  async function startHydra() {
+    const gen = ++generation
+    stopHydra()
+    hideErr()
+    stats.reset()
+
+    const preset = PRESETS.find(p => p.id === cfg.preset)
+    if (!preset) { showErr('No presets found — run:  node build-presets.mjs'); return }
+
+    const [w, h] = computeRes(cfg)
+    currentRes = [w, h]
+    canvas = document.createElement('canvas')
+    canvas.width = w; canvas.height = h
+    $('stage').appendChild(canvas)
+
+    hydra = new Hydra({ canvas, detectAudio: false, precision: cfg.precision, numOutputs: 8, numSources: 8, autoLoop: false, makeGlobal: true })
+    window.hydraSynth = hydra
+    gl = hydra.regl._gl
+    hydra.synth.resolution = [w, h] // some shader libs read this
+    hydra.synth.fps = Number(cfg.fps) || undefined
+    window.fps = hydra.synth.fps
+
+    currentSource = transform(preset.source, cfg)
+    currentPasses = countPasses(currentSource)
+    $('src').textContent = currentSource
+
+    const t0 = performance.now()
+    try {
+      await new AsyncFunction(currentSource)()
+    } catch (err) {
+      console.error(err); showErr(String(err && err.stack || err)); return
+    }
+    if (gen !== generation) return // superseded by a newer start
+    startup.loadMs = performance.now() - t0
+    window.fps = Number(cfg.fps) || undefined
+
+    running = true; firstTick = true; lastNow = 0
+    rafId = requestAnimationFrame(loopFrame)
+    updateStaticHud()
+  }
+
+  // NB: not named "frame" — the sketches do window.frame++ which would clobber it
+  function loopFrame(now) {
+    if (!running) return
+    rafId = requestAnimationFrame(loopFrame)
+    const dt = lastNow ? now - lastNow : 16.7
+    lastNow = now
+    const t0 = performance.now()
+    try {
+      hydra.tick(dt)
+    } catch (err) {
+      running = false; console.error(err); showErr(String(err && err.stack || err)); return
+    }
+    const tick = performance.now() - t0
+    const rendered = hydra.timeSinceLastUpdate === 0
+    if (firstTick) { startup.compileMs = tick; firstTick = false; updateStaticHud() }
+    else stats.add(now, dt, tick, rendered) // skip the compile frame
+    if (bench.active) bench.sample(dt, tick, rendered)
+  }
+
+  // ======================================================================
+  //  STATS + HUD
+  // ======================================================================
+  const stats = {
+    N: 240, i: 0, n: 0,
+    ts: new Float64Array(240), dts: new Float32Array(240), ticks: new Float32Array(240), rend: new Uint8Array(240),
+    reset() { this.i = 0; this.n = 0; this.ts.fill(0); this.dts.fill(0); this.ticks.fill(0); this.rend.fill(0) },
+    add(t, dt, tick, rendered) {
+      this.ts[this.i] = t; this.dts[this.i] = dt; this.ticks[this.i] = tick; this.rend[this.i] = rendered ? 1 : 0
+      this.i = (this.i + 1) % this.N; this.n = Math.min(this.n + 1, this.N)
+    },
+    // everything within the last `win` ms
+    window(win = 1000) {
+      const now = performance.now()
+      let frames = 0, rendered = 0, dtSum = 0, dtMax = 0, tSum = 0, tMax = 0
+      for (let k = 0; k < this.n; k++) {
+        const j = (this.i - 1 - k + this.N) % this.N
+        if (now - this.ts[j] > win) break
+        frames++; rendered += this.rend[j]; dtSum += this.dts[j]; dtMax = Math.max(dtMax, this.dts[j])
+        tSum += this.ticks[j]; tMax = Math.max(tMax, this.ticks[j])
+      }
+      return { frames, rendered, dtAvg: frames ? dtSum / frames : 0, dtMax, tickAvg: frames ? tSum / frames : 0, tickMax: tMax }
+    },
+  }
+
+  const spark = $('spark').getContext('2d')
+  function drawSpark() {
+    const W = spark.canvas.width, H = spark.canvas.height
+    spark.clearRect(0, 0, W, H)
+    spark.fillStyle = 'rgba(255,255,255,0.08)'; spark.fillRect(0, H - Math.round(H * 16.7 / 50), W, 1) // 60fps line
+    spark.fillStyle = 'rgba(255,255,255,0.16)'; spark.fillRect(0, H - Math.round(H * 33.3 / 50), W, 1) // 30fps line
+    const count = Math.min(stats.n, W)
+    for (let k = 0; k < count; k++) {
+      const j = (stats.i - 1 - k + stats.N) % stats.N
+      const dt = stats.dts[j]
+      const hgt = Math.min(H, Math.round(H * dt / 50))
+      spark.fillStyle = dt < 20 ? '#b8ff4a' : dt < 36 ? '#ffcc4a' : '#ff5a5a'
+      spark.fillRect(W - 1 - k, H - hgt, 1, hgt)
+    }
+  }
+
+  const cls = (fps) => fps >= 55 ? 'good' : fps >= 27 ? 'meh' : 'bad'
+  function updateHud() {
+    if (!hydraVisible()) return
+    const w = stats.window(1000)
+    const fps = w.frames
+    const el = $('h-fps')
+    if (document.hidden) { el.textContent = 'paused'; el.className = 'meh'; el.nextElementSibling.textContent = 'tab hidden — rAF stopped' }
+    else { el.textContent = running ? fps : '--'; el.className = cls(fps); el.nextElementSibling.textContent = 'fps page' }
+    $('h-rfps').textContent = running ? w.rendered : '--'
+    $('h-frame').textContent = running ? `${w.dtAvg.toFixed(1)} / ${w.dtMax.toFixed(1)}` : '--'
+    $('h-tick').textContent = running ? `${w.tickAvg.toFixed(2)} / ${w.tickMax.toFixed(1)}` : '--'
+    drawSpark()
+  }
+  const hydraVisible = () => !$('hud').hidden
+  function updateStaticHud() {
+    const [w, h] = currentRes
+    $('h-res').textContent = `${w}×${h} ${cfg.precision}` + (Number(cfg.fps) ? ` cap ${cfg.fps}` : '')
+    $('h-load').textContent = `${currentPasses} · ${(currentPasses * w * h / 1e6).toFixed(1)}`
+    $('h-cfg').textContent = `${shortPreset(cfg.preset)} · ${stageTag(cfg)}`
+    $('h-start').textContent = `${Math.round(startup.loadMs)} / ${Math.round(startup.compileMs)} ms`
+  }
+  const shortPreset = (id) => (PRESETS.find(p => p.id === id) || { label: id }).label.replace('Preset ', 'P')
+  const stageTag = (c) => [Number(c.sort) ? 'sort' : '-', Number(c.green) ? 'green' : '-', Number(c.post) ? 'post' : '-', c.l3 === 'single' ? 'L3:1' : 'L3:8'].join(' ')
+  setInterval(updateHud, 250)
+
+  // ======================================================================
+  //  BENCHMARK
+  // ======================================================================
+  const bench = {
+    active: false, plan: [], idx: 0, results: [], phase: 'idle', tPhase: 0,
+    dts: [], ticks: [], rendered: 0, timer: 0,
+    sample(dt, tick, rendered) {
+      if (this.phase !== 'measure') return
+      this.dts.push(dt); this.ticks.push(tick); if (rendered) this.rendered++
+    },
+  }
+  bench.results = loadResults()
+
+  function buildPlan() {
+    const mode = $('f-bmode').value, scope = $('f-bscope').value
+    const presets = scope === 'all' ? PRESETS.map(p => p.id) : [cfg.preset]
+    const plan = []
+    for (const preset of presets) {
+      if (mode === 'ladder' || mode === 'both') {
+        for (const res of LADDER) plan.push({ ...cfg, preset, res, group: 'ladder' })
+      }
+      if (mode === 'ablation' || mode === 'both') {
+        const base = { ...cfg, preset, sort: 1, green: 1, post: 1, l3: 'full' }
+        plan.push({ ...base, group: 'ablation', tag: 'full' })
+        plan.push({ ...base, sort: 0, group: 'ablation', tag: 'no sort' })
+        plan.push({ ...base, green: 0, group: 'ablation', tag: 'no green' })
+        plan.push({ ...base, post: 0, group: 'ablation', tag: 'no post' })
+        plan.push({ ...base, l3: 'single', group: 'ablation', tag: 'L3 single' })
+        plan.push({ ...base, sort: 0, green: 0, post: 0, l3: 'single', group: 'ablation', tag: 'all lite' })
+      }
+    }
+    return plan
+  }
+
+  async function startBench() {
+    if (bench.active) return
+    bench.plan = buildPlan(); bench.idx = 0; bench.active = true
+    bench.saved = { ...cfg }
+    $('benchbar').hidden = false
+    runBenchStep()
+  }
+
+  function stopBench(finished) {
+    if (!bench.active) return
+    clearTimeout(bench.timer)
+    bench.active = false; bench.phase = 'idle'
+    $('benchbar').hidden = true
+    Object.assign(cfg, bench.saved); applyCfgToForm(); syncURL(); startHydra()
+    toast(finished ? `Benchmark done · ${bench.results.length} rows` : 'Benchmark stopped')
+  }
+
+  async function runBenchStep() {
+    if (!bench.active) return
+    if (bench.idx >= bench.plan.length) return stopBench(true)
+    const step = bench.plan[bench.idx]
+    const secs = Math.max(3, Number($('f-bsec').value) || 6)
+    const warm = 2000
+    $('benchbar').textContent = `BENCH ${bench.idx + 1}/${bench.plan.length} · ${shortPreset(step.preset)} ${step.res}p ${step.tag || ''} · warming up`
+
+    for (const k of REBUILD_KEYS) cfg[k] = step[k]
+    applyCfgToForm(); syncURL()
+    bench.phase = 'warmup'
+    await startHydra()
+    if (!bench.active) return
+    const [w, h] = currentRes
+    const stepStartup = { ...startup }
+
+    // wait for the first (compile) frame, then the warmup period
+    await wait(warm)
+    if (!bench.active) return
+    bench.phase = 'measure'; bench.dts = []; bench.ticks = []; bench.rendered = 0
+    $('benchbar').textContent = `BENCH ${bench.idx + 1}/${bench.plan.length} · ${shortPreset(step.preset)} ${step.res}p ${step.tag || ''} · measuring ${secs}s`
+    await wait(secs * 1000)
+    if (!bench.active) return
+    bench.phase = 'idle'
+
+    const dts = bench.dts.slice().sort((a, b) => a - b)
+    const mean = (a) => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0
+    const p99 = dts.length ? dts[Math.min(dts.length - 1, Math.floor(dts.length * 0.99))] : 0
+    const fps = dts.length ? 1000 / mean(dts) : 0
+    const row = {
+      time: new Date().toISOString(), device: deviceLabel(), preset: shortPreset(step.preset), group: step.group, tag: step.tag || stageTag(step),
+      res: `${w}×${h}`, resKey: step.res, passes: currentPasses, mpx: +(currentPasses * w * h / 1e6).toFixed(2),
+      fps: +fps.toFixed(1), low1: +(p99 ? 1000 / p99 : 0).toFixed(1), renderFps: +(bench.rendered / secs).toFixed(1),
+      tickAvg: +mean(bench.ticks).toFixed(2), tickMax: +(Math.max(0, ...bench.ticks)).toFixed(1),
+      loadMs: Math.round(stepStartup.loadMs), compileMs: Math.round(stepStartup.compileMs),
+      precision: step.precision, cap: Number(step.fps) || 0, ua: navigator.userAgent,
+    }
+    bench.results.push(row); saveResults(); renderResults()
+
+    // ladder: skip the remaining (larger) resolutions for this preset once it drops below the threshold
+    const stopBelow = Number($('f-bstop').value) || 0
+    if (step.group === 'ladder' && stopBelow && fps < stopBelow) {
+      while (bench.idx + 1 < bench.plan.length && bench.plan[bench.idx + 1].group === 'ladder' && bench.plan[bench.idx + 1].preset === step.preset) bench.idx++
+    }
+    bench.idx++
+    runBenchStep()
+  }
+  const wait = (ms) => new Promise((res) => { bench.timer = setTimeout(res, ms) })
+
+  function verdict(fps) { return fps >= 55 ? 'smooth 60' : fps >= 27 ? 'ok @30' : fps >= 14 ? 'marginal' : 'no' }
+  function renderResults() {
+    const tb = $('results').querySelector('tbody'); tb.innerHTML = ''
+    $('results').hidden = bench.results.length === 0
+    $('csv').hidden = bench.results.length === 0
+    for (const r of bench.results) {
+      const tr = document.createElement('tr')
+      tr.innerHTML = `<td>${r.device || ''}</td><td>${r.preset}</td><td>${r.res}</td><td>${r.tag}</td><td class="${cls(r.fps)}">${r.fps}</td><td>${r.low1}</td><td>${r.tickAvg}</td><td>${r.compileMs}</td><td class="${cls(r.fps)}">${verdict(r.fps)}</td>`
+      tb.appendChild(tr)
+    }
+    $('csv').value = toCSV(bench.results)
+  }
+  function toCSV(rows) {
+    if (!rows.length) return ''
+    const cols = ['time', 'device', 'preset', 'group', 'tag', 'res', 'passes', 'mpx', 'fps', 'low1', 'renderFps', 'tickAvg', 'tickMax', 'loadMs', 'compileMs', 'precision', 'cap', 'ua']
+    const esc = (v) => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v
+    return [cols.join(','), ...rows.map(r => cols.map(c => esc(r[c])).join(','))].join('\n')
+  }
+  function deviceLabel() { return ($('f-device').value || '').trim() }
+  try { $('f-device').value = localStorage.getItem('hydra-pi-device') || '' } catch (e) {}
+  $('f-device').onchange = () => { try { localStorage.setItem('hydra-pi-device', deviceLabel()) } catch (e) {} }
+  function saveResults() { try { localStorage.setItem('hydra-pi-bench', JSON.stringify(bench.results)) } catch (e) {} }
+  function loadResults() { try { return JSON.parse(localStorage.getItem('hydra-pi-bench') || '[]') } catch (e) { return [] } }
+
+  // ======================================================================
+  //  DEVICE INFO
+  // ======================================================================
+  function deviceInfo() {
+    let gpu = 'n/a', glv = 'n/a', maxTex = 'n/a'
+    try {
+      const g = gl || document.createElement('canvas').getContext('webgl')
+      const dbg = g.getExtension('WEBGL_debug_renderer_info')
+      gpu = dbg ? `${g.getParameter(dbg.UNMASKED_VENDOR_WEBGL)} · ${g.getParameter(dbg.UNMASKED_RENDERER_WEBGL)}` : g.getParameter(g.RENDERER)
+      glv = g.getParameter(g.VERSION); maxTex = g.getParameter(g.MAX_TEXTURE_SIZE)
+    } catch (e) {}
+    const mem = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'n/a'
+    return `<b>gpu</b>  ${gpu}\n<b>gl</b>   ${glv}  maxTex ${maxTex}\n<b>cpu</b>  ${navigator.hardwareConcurrency || '?'} cores · mem ${mem}\n<b>win</b>  ${innerWidth}×${innerHeight} @ dpr ${devicePixelRatio} · screen ${screen.width}×${screen.height}\n<b>ua</b>   ${navigator.userAgent}`
+  }
+
+  // ======================================================================
+  //  UI WIRING
+  // ======================================================================
+  function applyCfgToForm() {
+    $('f-preset').value = cfg.preset
+    $('f-target').value = cfg.target
+    $('f-res').value = cfg.res
+    $('f-precision').value = cfg.precision
+    $('f-fps').value = String(cfg.fps)
+    $('f-view').value = cfg.view
+    $('f-libs').value = cfg.libs
+    $('f-sort').checked = !!Number(cfg.sort)
+    $('f-green').checked = !!Number(cfg.green)
+    $('f-post').checked = !!Number(cfg.post)
+    $('f-l3').checked = cfg.l3 !== 'single'
+    $('f-smooth').checked = !!Number(cfg.smooth)
+    $('f-hud').checked = !!Number(cfg.hud)
+    document.body.classList.toggle('pixelated', !Number(cfg.smooth))
+    $('hud').hidden = !Number(cfg.hud)
+    $('panel').hidden = !Number(cfg.panel)
+    updateStaticHud()
+  }
+
+  function set(key, value) {
+    if (String(cfg[key]) === String(value)) return
+    cfg[key] = value
+    syncURL(); applyCfgToForm()
+    if (REBUILD_KEYS.includes(key)) startHydra()
+    else if (key === 'fps') { window.fps = Number(value) || undefined; updateStaticHud() }
+    else if (key === 'view') { try { window.render(window[value]) } catch (e) { startHydra() } }
+  }
+
+  for (const p of PRESETS) { const o = document.createElement('option'); o.value = p.id; o.textContent = p.label; $('f-preset').appendChild(o) }
+  $('f-preset').onchange = (e) => set('preset', e.target.value)
+  $('b-target').onclick = () => applyProfile($('f-target').value)
+  $('f-target').onchange = (e) => { const p = PROFILES[e.target.value]; $('target-note').textContent = p ? p.note : '' }
+  $('f-res').onchange = (e) => set('res', e.target.value)
+  $('f-precision').onchange = (e) => set('precision', e.target.value)
+  $('f-fps').onchange = (e) => set('fps', Number(e.target.value))
+  $('f-view').onchange = (e) => set('view', e.target.value)
+  $('f-libs').onchange = (e) => set('libs', e.target.value)
+  $('f-sort').onchange = (e) => set('sort', e.target.checked ? 1 : 0)
+  $('f-green').onchange = (e) => set('green', e.target.checked ? 1 : 0)
+  $('f-post').onchange = (e) => set('post', e.target.checked ? 1 : 0)
+  $('f-l3').onchange = (e) => set('l3', e.target.checked ? 'full' : 'single')
+  $('f-smooth').onchange = (e) => set('smooth', e.target.checked ? 1 : 0)
+  $('f-hud').onchange = (e) => set('hud', e.target.checked ? 1 : 0)
+  $('b-restart').onclick = () => startHydra()
+  $('b-full').onclick = toggleFullscreen
+  $('b-link').onclick = () => copyText(location.href, 'Link copied')
+  $('b-bench').onclick = startBench
+  $('b-bstop').onclick = () => stopBench(false)
+  $('b-copy').onclick = () => copyText($('csv').value, 'CSV copied')
+  $('b-clear').onclick = () => { bench.results = []; saveResults(); renderResults() }
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen()
+    else document.documentElement.requestFullscreen().catch(() => {})
+  }
+  async function copyText(text, msg) {
+    try { await navigator.clipboard.writeText(text); toast(msg) }
+    catch (e) { $('csv').hidden = false; $('csv').value = text; $('csv').select(); toast('Select + copy from the text box') }
+  }
+  let toastT = 0
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800) }
+  function showErr(msg) { $('err').textContent = msg; $('err').hidden = false }
+  function hideErr() { $('err').hidden = true }
+
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target.tagName || '').toLowerCase()
+    if (tag === 'input' || tag === 'select' || tag === 'textarea') return
+    if (e.ctrlKey || e.metaKey || e.altKey) return
+    const k = e.key
+    if (k === 'p' || k === 'P') { set('panel', Number(cfg.panel) ? 0 : 1) }
+    else if (k === 'Escape') { set('panel', 0) }
+    else if (k === 'h' || k === 'H') { set('hud', Number(cfg.hud) ? 0 : 1) }
+    else if (k === 's' || k === 'S') { set('sort', Number(cfg.sort) ? 0 : 1) }
+    else if (k === 'g' || k === 'G') { set('green', Number(cfg.green) ? 0 : 1) }
+    else if (k === 'o' || k === 'O') { set('post', Number(cfg.post) ? 0 : 1) }
+    else if (k === 'l' || k === 'L') { set('l3', cfg.l3 === 'single' ? 'full' : 'single') }
+    else if (k === 'r' || k === 'R') { startHydra() }
+    else if (k === 'f' || k === 'F') { toggleFullscreen() }
+    else if (k === 'b' || k === 'B') { bench.active ? stopBench(false) : startBench() }
+    else if (k === '[' || k === ']') {
+      const i = LADDER.indexOf(String(cfg.res))
+      const j = i < 0 ? LADDER.indexOf('360') : Math.min(LADDER.length - 1, Math.max(0, i + (k === ']' ? 1 : -1)))
+      set('res', LADDER[j])
+    }
+    else if (/^[1-9]$/.test(k)) { const p = PRESETS[Number(k) - 1]; if (p) set('preset', p.id) }
+    else return
+    e.preventDefault()
+  })
+
+  let resizeT = 0
+  window.addEventListener('resize', () => {
+    $('info').innerHTML = deviceInfo()
+    if (bench.active || /^\d+x\d+$/.test(cfg.res)) return
+    clearTimeout(resizeT); resizeT = setTimeout(startHydra, 350)
+  })
+
+  // ======================================================================
+  //  BOOT
+  // ======================================================================
+  if (q.has('target') && PROFILES[cfg.target]) {
+    // explicit URL params win over the profile; the profile fills in the rest
+    const explicit = {}; for (const k of Object.keys(PROFILES[cfg.target].cfg)) if (q.has(k)) explicit[k] = cfg[k]
+    applyProfile(cfg.target, false); Object.assign(cfg, explicit)
+  } else { $('target-note').textContent = PROFILES[cfg.target].note }
+  applyCfgToForm()
+  renderResults()
+  startHydra().then(() => {
+    $('info').innerHTML = deviceInfo()
+    const b = q.get('bench')
+    if (b) { $('f-bmode').value = ['ladder', 'ablation', 'both'].includes(b) ? b : 'ladder'; if (q.get('scope') === 'all') $('f-bscope').value = 'all'; startBench() }
+  })
+  </script>
+</body>
+</html>

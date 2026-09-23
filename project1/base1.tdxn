@@ -1,0 +1,1366 @@
+format: tdxn
+version: '2.1'
+build: 13
+generator: Embody/6.2.56
+td_build: 099.2025.33230
+network_path: /project1/base1
+options:
+  include_dat_content: false
+  include_storage: true
+type_defaults:
+  constantMAT:
+    parameters:
+      colormapfilter: nearest
+      skelrootpath: =parent()
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  cropTOP:
+    parameters:
+      cropbottomunit: pixels
+      croptopunit: pixels
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  geometryCOMP:
+    size: [160, 130]
+    color: [0.67, 0.67, 0.67]
+  inPOP:
+    parameters:
+      label: =me.name
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  mergePOP:
+    parameters:
+      uniquegroupname: true
+    flags:
+    - viewer
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  moviefileinTOP:
+    parameters:
+      index: =me.time.frame
+      overridesample: true
+      prereadframes: 10
+      samplerate: 60
+      timecodeop: =tdu.Timecode()
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  nullPOP:
+    flags:
+    - display
+    - render
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  rectanglePOP:
+    parameters:
+      texture: vert
+    flags:
+    - viewer
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  selectPOP:
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  selectTOP:
+    parameters:
+      top: null1
+    flags:
+    - viewer
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  textDAT:
+    parameters:
+      language: python
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+  windowCOMP:
+    parameters:
+      borders: false
+      size: custom
+    size: [160, 130]
+    color: [0.67, 0.67, 0.67]
+type: baseCOMP
+flags:
+- viewer
+color: [0.3, 0.5, 0.9]
+tags:
+- tdxn
+operators:
+- name: cam1
+  type: cameraCOMP
+  parameters:
+    tz: 4
+    fov: 52.1
+  flags:
+  - viewer
+  position: [4500, 725]
+  size: [160, 130]
+  color: [0.67, 0.67, 0.67]
+  children:
+  - name: file1
+    type: fileinPOP
+    parameters:
+      file: =app.samplesFolder + '/Geo/defcam.tog'
+    flags:
+    - display
+    - viewer
+    size: [130, 90]
+    color: [0.67, 0.67, 0.67]
+- name: out1
+  type: outTOP
+  parameters:
+    label: =me.name
+  flags:
+  - viewer
+  position: [5000, 600]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  inputs:
+  - render1
+- name: info1
+  type: infoCHOP
+  parameters:
+    op: webrender1
+    autoexportroot: =parent()
+  flags:
+  - viewer
+  position: [-175, 75]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+- name: null1
+  type: nullTOP
+  flags:
+  - viewer
+  position: [150, 375]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  inputs:
+  - webrender1
+- name: trail1
+  type: trailCHOP
+  parameters:
+    wlength: 20
+    rate: =me.time.rate
+    autoexportroot: =parent()
+  flags:
+  - viewer
+  position: [-25, -50]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  inputs:
+  - select4
+- name: geo_u01
+  type: geometryCOMP
+  parameters:
+    material: mat_u01
+  flags:
+  - viewer
+  position: [4100, -4400]
+  inputs:
+  - select_u01
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_u02
+  type: geometryCOMP
+  parameters:
+    material: mat_u02
+  position: [4100, -4800]
+  inputs:
+  - select_u02
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_u03
+  type: geometryCOMP
+  parameters:
+    material: mat_u03
+  flags:
+  - viewer
+  position: [4100, -5200]
+  inputs:
+  - select_u03
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_u04
+  type: geometryCOMP
+  parameters:
+    material: mat_u04
+  position: [4100, -5600]
+  inputs:
+  - select_u04
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_u05
+  type: geometryCOMP
+  parameters:
+    material: mat_u05
+  position: [4100, -6000]
+  inputs:
+  - select_u05
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_u06
+  type: geometryCOMP
+  parameters:
+    material: mat_u06
+  position: [4100, -6400]
+  inputs:
+  - select_u06
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_u07
+  type: geometryCOMP
+  parameters:
+    material: mat_u07
+  position: [4100, -6800]
+  inputs:
+  - select_u07
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: mat_u01
+  type: constantMAT
+  parameters:
+    colormap: crop_u01
+  flags:
+  - viewer
+  position: [3700, -4400]
+- name: mat_u02
+  type: constantMAT
+  parameters:
+    colormap: crop_u02
+  position: [3700, -4800]
+- name: mat_u03
+  type: constantMAT
+  parameters:
+    colormap: crop_u03
+  flags:
+  - viewer
+  position: [3700, -5200]
+- name: mat_u04
+  type: constantMAT
+  parameters:
+    colormap: crop_u04
+  position: [3700, -5600]
+- name: mat_u05
+  type: constantMAT
+  parameters:
+    colormap: crop_u05
+  position: [3700, -6000]
+- name: mat_u06
+  type: constantMAT
+  parameters:
+    colormap: crop_u06
+  position: [3700, -6400]
+- name: mat_u07
+  type: constantMAT
+  parameters:
+    colormap: crop_u07
+  position: [3700, -6800]
+- name: render1
+  type: renderTOP
+  parameters:
+    geometry: geo_g*_* geo_u*
+    bgcolorr: 0.9
+    bgcolorg: 0.9
+    bgcolorb: 0.9
+    bgcolora: 1
+    resolutionw: 1920
+    resolutionh: 1080
+  flags:
+  - viewer
+  position: [4500, 600]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+- name: select1
+  type: selectTOP
+  position: [2875, 925]
+- name: select2
+  type: selectTOP
+  position: [2875, -1225]
+- name: select3
+  type: selectTOP
+  position: [2875, -2800]
+- name: select4
+  type: selectCHOP
+  parameters:
+    channames: updates_per_second
+    autoexportroot: =parent()
+  flags:
+  - viewer
+  position: [-175, -50]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  inputs:
+  - info1
+- name: crop_u01
+  type: cropTOP
+  parameters:
+    cropleft: 110
+    cropleftunit: pixels
+    cropright: 211
+    croprightunit: pixels
+    croptop: 180
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3300, -4400]
+  inputs:
+  - movie_u01
+- name: crop_u02
+  type: cropTOP
+  parameters:
+    cropleft: 17
+    cropleftunit: pixels
+    cropright: 304
+    croprightunit: pixels
+    croptop: 180
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3300, -4800]
+  inputs:
+  - movie_u02
+- name: crop_u03
+  type: cropTOP
+  parameters:
+    cropleft: 122
+    cropleftunit: pixels
+    cropright: 199
+    croprightunit: pixels
+    croptop: 180
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3300, -5200]
+  inputs:
+  - movie_u03
+- name: crop_u04
+  type: cropTOP
+  parameters:
+    cropleft: 110
+    cropleftunit: pixels
+    cropright: 211
+    croprightunit: pixels
+    croptop: 180
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3300, -5600]
+  inputs:
+  - movie_u04
+- name: crop_u05
+  type: cropTOP
+  parameters:
+    cropleft: 109
+    cropleftunit: pixels
+    cropright: 210
+    croprightunit: pixels
+    croptop: 180
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3300, -6000]
+  inputs:
+  - movie_u05
+- name: crop_u06
+  type: cropTOP
+  parameters:
+    cropleft: 110
+    cropleftunit: pixels
+    cropright: 211
+    croprightunit: pixels
+    croptop: 180
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3300, -6400]
+  inputs:
+  - movie_u06
+- name: crop_u07
+  type: cropTOP
+  parameters:
+    cropleft: 12
+    cropleftunit: pixels
+    cropright: 309
+    croprightunit: pixels
+    croptop: 180
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3300, -6800]
+  inputs:
+  - movie_u07
+- name: geo_g1_01
+  type: geometryCOMP
+  parameters:
+    material: mat_g1_01
+  position: [4100, 1000]
+  inputs:
+  - select_g1_01
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_g1_02
+  type: geometryCOMP
+  parameters:
+    material: mat_g1_02
+  position: [4100, 600]
+  inputs:
+  - select_g1_02
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_g1_03
+  type: geometryCOMP
+  parameters:
+    material: mat_g1_03
+  position: [4100, 200]
+  inputs:
+  - select_g1_03
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_g2_01
+  type: geometryCOMP
+  parameters:
+    material: mat_g2_01
+  position: [4100, -1200]
+  inputs:
+  - select_g2_01
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_g2_02
+  type: geometryCOMP
+  parameters:
+    material: mat_g2_02
+  position: [4100, -1600]
+  inputs:
+  - select_g2_02
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_g2_03
+  type: geometryCOMP
+  parameters:
+    material: mat_g2_03
+  position: [4100, -2000]
+  inputs:
+  - select_g2_03
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_g3_01
+  type: geometryCOMP
+  parameters:
+    material: mat_g3_01
+  flags:
+  - viewer
+  position: [4100, -2800]
+  inputs:
+  - select_g3_01
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_g3_02
+  type: geometryCOMP
+  parameters:
+    material: mat_g3_02
+  position: [4100, -3200]
+  inputs:
+  - select_g3_02
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: geo_g3_03
+  type: geometryCOMP
+  parameters:
+    material: mat_g3_03
+  position: [4100, -3600]
+  inputs:
+  - select_g3_03
+  children:
+  - name: in1
+    type: inPOP
+  - name: null_out
+    type: nullPOP
+    position: [400, 0]
+    inputs:
+    - in1
+- name: mat_g1_01
+  type: constantMAT
+  parameters:
+    colormap: crop_g1_01
+  position: [3700, 925]
+- name: mat_g1_02
+  type: constantMAT
+  parameters:
+    colormap: crop_g1_02
+  position: [3700, 500]
+- name: mat_g1_03
+  type: constantMAT
+  parameters:
+    colormap: crop_g1_03
+  position: [3700, 75]
+- name: mat_g2_01
+  type: constantMAT
+  parameters:
+    colormap: crop_g2_01
+  position: [3700, -1200]
+- name: mat_g2_02
+  type: constantMAT
+  parameters:
+    colormap: crop_g2_02
+  position: [3700, -1600]
+- name: mat_g2_03
+  type: constantMAT
+  parameters:
+    colormap: crop_g2_03
+  position: [3700, -2000]
+- name: mat_g3_01
+  type: constantMAT
+  parameters:
+    colormap: crop_g3_01
+  position: [3700, -2800]
+- name: mat_g3_02
+  type: constantMAT
+  parameters:
+    colormap: crop_g3_02
+  position: [3700, -3200]
+- name: mat_g3_03
+  type: constantMAT
+  parameters:
+    colormap: crop_g3_03
+  position: [3700, -3600]
+- name: movie_u01
+  type: moviefileinTOP
+  parameters:
+    file: Hydra/clips/clip-26_preset-43
+  position: [2900, -4400]
+- name: movie_u02
+  type: moviefileinTOP
+  parameters:
+    file: Hydra/clips/clip-32_preset-20
+  position: [2900, -4800]
+- name: movie_u03
+  type: moviefileinTOP
+  parameters:
+    file: Hydra/clips/clip-17_preset-152
+  position: [2900, -5200]
+- name: movie_u04
+  type: moviefileinTOP
+  parameters:
+    file: Hydra/clips/clip-60_preset-137
+  position: [2900, -5600]
+- name: movie_u05
+  type: moviefileinTOP
+  parameters:
+    file: Hydra/clips/clip-37_preset-140
+  position: [2900, -6000]
+- name: movie_u06
+  type: moviefileinTOP
+  parameters:
+    file: Hydra/clips/clip-56_preset-19
+  position: [2900, -6400]
+- name: movie_u07
+  type: moviefileinTOP
+  parameters:
+    file: Hydra/clips/clip-01_preset-195
+  flags:
+  - viewer
+  position: [2900, -6800]
+- name: crop_g1_01
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g1_01','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g1_01','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g1_01','cropbottom')
+    croptop: =op.ScreenMap.Layout('g1_01','croptop')
+  flags:
+  - viewer
+  position: [3300, 925]
+  inputs:
+  - crop_pane1
+- name: crop_g1_02
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g1_02','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g1_02','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g1_02','cropbottom')
+    croptop: =op.ScreenMap.Layout('g1_02','croptop')
+  position: [3300, 500]
+  inputs:
+  - crop_pane1
+- name: crop_g1_03
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g1_03','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g1_03','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g1_03','cropbottom')
+    croptop: =op.ScreenMap.Layout('g1_03','croptop')
+  position: [3300, 75]
+  inputs:
+  - crop_pane1
+- name: crop_g2_01
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g2_01','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g2_01','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g2_01','cropbottom')
+    croptop: =op.ScreenMap.Layout('g2_01','croptop')
+  flags:
+  - viewer
+  position: [3300, -1200]
+  inputs:
+  - crop_pane2
+- name: crop_g2_02
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g2_02','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g2_02','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g2_02','cropbottom')
+    croptop: =op.ScreenMap.Layout('g2_02','croptop')
+  flags:
+  - viewer
+  position: [3300, -1600]
+  inputs:
+  - crop_pane2
+- name: crop_g2_03
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g2_03','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g2_03','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g2_03','cropbottom')
+    croptop: =op.ScreenMap.Layout('g2_03','croptop')
+  flags:
+  - viewer
+  position: [3300, -2000]
+  inputs:
+  - crop_pane2
+- name: crop_g3_01
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g3_01','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g3_01','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g3_01','cropbottom')
+    croptop: =op.ScreenMap.Layout('g3_01','croptop')
+  flags:
+  - viewer
+  position: [3300, -2800]
+  inputs:
+  - crop_pane3
+- name: crop_g3_02
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g3_02','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g3_02','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g3_02','cropbottom')
+    croptop: =op.ScreenMap.Layout('g3_02','croptop')
+  flags:
+  - viewer
+  position: [3300, -3200]
+  inputs:
+  - crop_pane3
+- name: crop_g3_03
+  type: cropTOP
+  parameters:
+    cropleft: =op.ScreenMap.Layout('g3_03','cropleft')
+    cropleftunit: pixels
+    cropright: =op.ScreenMap.Layout('g3_03','cropright')
+    croprightunit: pixels
+    cropbottom: =op.ScreenMap.Layout('g3_03','cropbottom')
+    croptop: =op.ScreenMap.Layout('g3_03','croptop')
+  position: [3300, -3600]
+  inputs:
+  - crop_pane3
+- name: crop_pane1
+  type: cropTOP
+  parameters:
+    cropbottom: 1440
+    croptop: 2160
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3075, 925]
+  inputs:
+  - select1
+- name: crop_pane2
+  type: cropTOP
+  parameters:
+    cropbottom: 720
+    croptop: 1440
+    inputfiltertype: nearest
+  position: [3075, -1225]
+  inputs:
+  - select2
+- name: crop_pane3
+  type: cropTOP
+  parameters:
+    croptop: 720
+    inputfiltertype: nearest
+  flags:
+  - viewer
+  position: [3050, -2800]
+  inputs:
+  - select3
+- name: midiin_apc
+  type: midiinCHOP
+  parameters:
+    file: =app.samplesFolder+'/MIDI/default.midi'
+    onebased: false
+    autoexportroot: =parent()
+  flags:
+  - viewer
+  position: [-675, 375]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+- name: rect_g1_01
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g1_01','sizeu')
+    sizev: =op.ScreenMap.Layout('g1_01','sizev')
+    tx: =op.ScreenMap.Layout('g1_01','tx')
+    ty: =op.ScreenMap.Layout('g1_01','ty')
+    tz: =op.ScreenMap.Layout('g1_01', 'tz')
+  position: [1150, 1085]
+- name: rect_g1_02
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g1_02','sizeu')
+    sizev: =op.ScreenMap.Layout('g1_02','sizev')
+    tx: =op.ScreenMap.Layout('g1_02','tx')
+    ty: =op.ScreenMap.Layout('g1_02','ty')
+    tz: =op.ScreenMap.Layout('g1_02', 'tz')
+  position: [1150, 985]
+- name: rect_g1_03
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g1_03','sizeu')
+    sizev: =op.ScreenMap.Layout('g1_03','sizev')
+    tx: =op.ScreenMap.Layout('g1_03','tx')
+    ty: =op.ScreenMap.Layout('g1_03','ty')
+    tz: =op.ScreenMap.Layout('g1_03', 'tz')
+  position: [1150, 885]
+- name: rect_g2_01
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g2_01','sizeu')
+    sizev: =op.ScreenMap.Layout('g2_01','sizev')
+    tx: =op.ScreenMap.Layout('g2_01','tx')
+    ty: =op.ScreenMap.Layout('g2_01','ty')
+    tz: =op.ScreenMap.Layout('g2_01', 'tz')
+  position: [1150, 600]
+- name: rect_g2_02
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g2_02','sizeu')
+    sizev: =op.ScreenMap.Layout('g2_02','sizev')
+    tx: =op.ScreenMap.Layout('g2_02','tx')
+    ty: =op.ScreenMap.Layout('g2_02','ty')
+    tz: =op.ScreenMap.Layout('g2_02', 'tz')
+  position: [1150, 500]
+- name: rect_g2_03
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g2_03','sizeu')
+    sizev: =op.ScreenMap.Layout('g2_03','sizev')
+    tx: =op.ScreenMap.Layout('g2_03','tx')
+    ty: =op.ScreenMap.Layout('g2_03','ty')
+    tz: =op.ScreenMap.Layout('g2_03', 'tz')
+  position: [1150, 400]
+- name: rect_g3_01
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g3_01','sizeu')
+    sizev: =op.ScreenMap.Layout('g3_01','sizev')
+    tx: =op.ScreenMap.Layout('g3_01','tx')
+    ty: =op.ScreenMap.Layout('g3_01','ty')
+    tz: =op.ScreenMap.Layout('g3_01', 'tz')
+  position: [1150, 150]
+- name: rect_g3_02
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g3_02','sizeu')
+    sizev: =op.ScreenMap.Layout('g3_02','sizev')
+    tx: =op.ScreenMap.Layout('g3_02','tx')
+    ty: =op.ScreenMap.Layout('g3_02','ty')
+    tz: =op.ScreenMap.Layout('g3_02', 'tz')
+  position: [1150, 50]
+- name: rect_g3_03
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('g3_03','sizeu')
+    sizev: =op.ScreenMap.Layout('g3_03','sizev')
+    tx: =op.ScreenMap.Layout('g3_03','tx')
+    ty: =op.ScreenMap.Layout('g3_03','ty')
+    tz: =op.ScreenMap.Layout('g3_03', 'tz')
+  position: [1150, -50]
+- name: select_u01
+  type: selectPOP
+  parameters:
+    pop: rect_unique_01
+  position: [3700, -4200]
+- name: select_u02
+  type: selectPOP
+  parameters:
+    pop: rect_unique_02
+  position: [3700, -4600]
+- name: select_u03
+  type: selectPOP
+  parameters:
+    pop: rect_unique_03
+  position: [3700, -5000]
+- name: select_u04
+  type: selectPOP
+  parameters:
+    pop: rect_unique_04
+  position: [3700, -5400]
+- name: select_u05
+  type: selectPOP
+  parameters:
+    pop: rect_unique_05
+  position: [3700, -5800]
+- name: select_u06
+  type: selectPOP
+  parameters:
+    pop: rect_unique_06
+  position: [3700, -6200]
+- name: select_u07
+  type: selectPOP
+  parameters:
+    pop: rect_unique_07
+  position: [3700, -6600]
+- name: webrender1
+  type: webrenderTOP
+  parameters:
+    active: true
+    url: http://localhost:8080/split?a=main-1&b=main-2&c=main-3&dir=v&scale=0.5&stagger=0
+    maxrenderrate: 60
+    autorestart: true
+    resolutionh: 2160
+  flags:
+  - viewer
+  position: [-175, 375]
+  size: [93, 105]
+  color: [0.67, 0.67, 0.67]
+- name: window_u01
+  type: windowCOMP
+  parameters:
+    winop: crop_u01
+    title: Screen u01
+    display: =op.ScreenMap.Display('u01')
+    winw: =op.ScreenMap.Px('u01','w') or op('crop_u01').width
+    winh: =op.ScreenMap.Px('u01','h') or op('crop_u01').height
+  position: [4500, -4400]
+- name: window_u02
+  type: windowCOMP
+  parameters:
+    winop: crop_u02
+    title: Screen u02
+    display: =op.ScreenMap.Display('u02')
+    winw: =op.ScreenMap.Px('u02','w') or op('crop_u02').width
+    winh: =op.ScreenMap.Px('u02','h') or op('crop_u02').height
+  position: [4500, -4800]
+- name: window_u03
+  type: windowCOMP
+  parameters:
+    winop: crop_u03
+    title: Screen u03
+    display: =op.ScreenMap.Display('u03')
+    winw: =op.ScreenMap.Px('u03','w') or op('crop_u03').width
+    winh: =op.ScreenMap.Px('u03','h') or op('crop_u03').height
+  position: [4500, -5200]
+- name: window_u04
+  type: windowCOMP
+  parameters:
+    winop: crop_u04
+    title: Screen u04
+    display: =op.ScreenMap.Display('u04')
+    winw: =op.ScreenMap.Px('u04','w') or op('crop_u04').width
+    winh: =op.ScreenMap.Px('u04','h') or op('crop_u04').height
+  position: [4500, -5600]
+- name: window_u05
+  type: windowCOMP
+  parameters:
+    winop: crop_u05
+    title: Screen u05
+    display: =op.ScreenMap.Display('u05')
+    winw: =op.ScreenMap.Px('u05','w') or op('crop_u05').width
+    winh: =op.ScreenMap.Px('u05','h') or op('crop_u05').height
+  position: [4500, -6000]
+- name: window_u06
+  type: windowCOMP
+  parameters:
+    winop: crop_u06
+    title: Screen u06
+    display: =op.ScreenMap.Display('u06')
+    winw: =op.ScreenMap.Px('u06','w') or op('crop_u06').width
+    winh: =op.ScreenMap.Px('u06','h') or op('crop_u06').height
+  position: [4500, -6400]
+- name: window_u07
+  type: windowCOMP
+  parameters:
+    winop: crop_u07
+    title: Screen u07
+    display: =op.ScreenMap.Display('u07')
+    winw: =op.ScreenMap.Px('u07','w') or op('crop_u07').width
+    winh: =op.ScreenMap.Px('u07','h') or op('crop_u07').height
+  position: [4500, -6800]
+- name: midi_to_web
+  type: chopexecuteDAT
+  parameters:
+    fromop: =parent()
+    chop: midiin_apc
+  flags:
+  - viewer
+  position: [-475, 375]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  dat_content: |
+    # Pushes APC mini mk2 values from midiin_apc into the hydra page in webrender1.
+    #
+    # The embedded Chromium in a Web Render TOP has no MIDI permission dialog, so
+    # Web MIDI never works there. Instead the page's lib/midi.js exposes
+    # midi.set(type, number, value, channel), and cc(n) / note(n) in the sketch
+    # read what we push. The /split page forwards midi.set into every pane.
+    #
+    # midiin_apc runs in Automatic mode: channels appear as ch<midi channel>ctrl<cc>
+    # and ch<midi channel>note<note> (0-based, "1 Based Index" is off) with RAW
+    # 0..127 values -- they are scaled to 0..1 here, which is what the sketch expects.
+    #
+    # Only the five classic callbacks fire in this build (onValueChange per channel);
+    # there is no batched onValuesChanged, so each changed channel is one call.
+    # Do not write to me.storage in here: it creates a cook dependency loop on this DAT.
+    import re
+
+    _NAME = re.compile(r'^ch(\d+)(ctrl|note|c|n)(\d+)$')
+    _KIND = {'ctrl': 'cc', 'c': 'cc', 'note': 'note', 'n': 'note'}
+
+
+    def _webrender():
+        web = op('webrender1')
+        return web if web is not None and web.par.active.eval() else None
+
+
+    def _call(channel, val):
+        m = _NAME.match(channel.name)
+        if not m:
+            return None
+        midi_ch, kind, number = m.groups()
+        v = max(0.0, min(1.0, float(val) / 127.0))
+        return 'midi.set(%r,%s,%.4f,%s)' % (_KIND[kind], number, v, midi_ch)
+
+
+    def push(pairs):
+        """Send [(channel, value), ...] to the page in one round trip. Returns the count sent."""
+        web = _webrender()
+        if web is None:
+            return 0
+        calls = [c for c in (_call(ch, v) for ch, v in pairs) if c]
+        if calls:
+            # no-op until the page has loaded lib/midi.js
+            web.executeJavaScript('if(window.midi&&midi.set){%s}' % ';'.join(calls))
+        return len(calls)
+
+
+    def pushAll():
+        """Re-send every current channel value, e.g. after the page reloads."""
+        chop = op('midiin_apc')
+        if chop is None:
+            return 0
+        return push([(c, c.eval()) for c in chop.chans()])
+
+
+    def onValueChange(channel, sampleIndex, val, prev):
+        push([(channel, val)])
+        return
+
+
+    def onOffToOn(channel, sampleIndex, val, prev):
+        return
+
+    def whileOn(channel, sampleIndex, val, prev):
+        return
+
+    def onOnToOff(channel, sampleIndex, val, prev):
+        return
+
+    def whileOff(channel, sampleIndex, val, prev):
+        return
+  dat_content_format: text
+- name: timer_clips
+  type: timerCHOP
+  parameters:
+    length: 6.2859245701
+    cycle: true
+    cyclelimit: false
+    callbacks: timer_clips1_callbacks
+    exttcop: =tdu.Timecode()
+    rate: =me.time.rate
+    autoexportroot: =parent()
+  flags:
+  - viewer
+  position: [3300, -7200]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  storage:
+    lastTile: 0
+- name: folder_clips
+  type: folderDAT
+  parameters:
+    rootfolder: Hydra/clips
+    type: folders
+    callbacks: folder_clips1_callbacks
+  flags:
+  - viewer
+  position: [2900, -7200]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  dat_read_only: true
+- name: merge_group1
+  type: mergePOP
+  sequences:
+    input:
+    - {}
+    - {}
+    - {}
+  position: [1550, 985]
+  inputs:
+  - rect_g1_01
+  - rect_g1_02
+  - rect_g1_03
+- name: merge_group2
+  type: mergePOP
+  sequences:
+    input:
+    - {}
+    - {}
+    - {}
+  position: [1550, 500]
+  inputs:
+  - rect_g2_01
+  - rect_g2_02
+  - rect_g2_03
+- name: merge_group3
+  type: mergePOP
+  sequences:
+    input:
+    - {}
+    - {}
+    - {}
+  position: [1550, 50]
+  inputs:
+  - rect_g3_01
+  - rect_g3_02
+  - rect_g3_03
+- name: merge_unique
+  type: mergePOP
+  sequences:
+    input:
+    - {}
+    - {}
+    - {}
+    - {}
+    - {}
+    - {}
+    - {}
+  position: [1550, -300]
+  inputs:
+  - rect_unique_01
+  - rect_unique_02
+  - rect_unique_03
+  - rect_unique_04
+  - rect_unique_05
+  - rect_unique_06
+  - rect_unique_07
+- name: select_g1_01
+  type: selectPOP
+  parameters:
+    pop: rect_g1_01
+  flags:
+  - viewer
+  position: [3700, 1025]
+- name: select_g1_02
+  type: selectPOP
+  parameters:
+    pop: rect_g1_02
+  flags:
+  - viewer
+  position: [3700, 625]
+- name: select_g1_03
+  type: selectPOP
+  parameters:
+    pop: rect_g1_03
+  flags:
+  - viewer
+  position: [3700, 200]
+- name: select_g2_01
+  type: selectPOP
+  parameters:
+    pop: rect_g2_01
+  position: [3700, -1000]
+- name: select_g2_02
+  type: selectPOP
+  parameters:
+    pop: rect_g2_02
+  position: [3700, -1400]
+- name: select_g2_03
+  type: selectPOP
+  parameters:
+    pop: rect_g2_03
+  position: [3700, -1800]
+- name: select_g3_01
+  type: selectPOP
+  parameters:
+    pop: rect_g3_01
+  position: [3700, -2600]
+- name: select_g3_02
+  type: selectPOP
+  parameters:
+    pop: rect_g3_02
+  position: [3700, -3000]
+- name: select_g3_03
+  type: selectPOP
+  parameters:
+    pop: rect_g3_03
+  position: [3700, -3400]
+- name: rect_unique_01
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('u01','sizeu')
+    sizev: =op.ScreenMap.Layout('u01','sizev')
+    tx: =op.ScreenMap.Layout('u01','tx')
+    ty: =op.ScreenMap.Layout('u01','ty')
+    tz: =op.ScreenMap.Layout('u01', 'tz')
+  position: [1150, -313]
+- name: rect_unique_02
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('u02','sizeu')
+    sizev: =op.ScreenMap.Layout('u02','sizev')
+    tx: =op.ScreenMap.Layout('u02','tx')
+    ty: =op.ScreenMap.Layout('u02','ty')
+    tz: =op.ScreenMap.Layout('u02', 'tz')
+  position: [1150, -413]
+- name: rect_unique_03
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('u03','sizeu')
+    sizev: =op.ScreenMap.Layout('u03','sizev')
+    tx: =op.ScreenMap.Layout('u03','tx')
+    ty: =op.ScreenMap.Layout('u03','ty')
+    tz: =op.ScreenMap.Layout('u03', 'tz')
+  position: [1150, -513]
+- name: rect_unique_04
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('u04','sizeu')
+    sizev: =op.ScreenMap.Layout('u04','sizev')
+    tx: =op.ScreenMap.Layout('u04','tx')
+    ty: =op.ScreenMap.Layout('u04','ty')
+    tz: =op.ScreenMap.Layout('u04', 'tz')
+  position: [1150, -613]
+- name: rect_unique_05
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('u05','sizeu')
+    sizev: =op.ScreenMap.Layout('u05','sizev')
+    tx: =op.ScreenMap.Layout('u05','tx')
+    ty: =op.ScreenMap.Layout('u05','ty')
+    tz: =op.ScreenMap.Layout('u05', 'tz')
+  position: [1150, -713]
+- name: rect_unique_06
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('u06','sizeu')
+    sizev: =op.ScreenMap.Layout('u06','sizev')
+    tx: =op.ScreenMap.Layout('u06','tx')
+    ty: =op.ScreenMap.Layout('u06','ty')
+    tz: =op.ScreenMap.Layout('u06', 'tz')
+  position: [1150, -813]
+- name: rect_unique_07
+  type: rectanglePOP
+  parameters:
+    sizeu: =op.ScreenMap.Layout('u07','sizeu')
+    sizev: =op.ScreenMap.Layout('u07','sizev')
+    tx: =op.ScreenMap.Layout('u07','tx')
+    ty: =op.ScreenMap.Layout('u07','ty')
+    tz: =op.ScreenMap.Layout('u07', 'tz')
+  position: [1150, -913]
+- name: timer_clips1_callbacks
+  type: textDAT
+  flags:
+  - viewer
+  position: [3300, -7320]
+  dock: timer_clips
+  dat_content: "\"\"\"Timer CHOP callbacks for timer_clips -- the NON-INTERACTIVE screens' clip switcher.\n\nEvery cycle (a random 5..10 s) one random screen (never the one changed last time) gets a\nrandom clip folder from folder_clips (never a clip already playing on another screen), and\nthe next cycle length is re-randomised. Players are movie_u01..movie_u07, each a Movie File\nIn reading a PNG sequence folder under Hydra/clips (rendered by Hydra/tools/render-clips.mjs).\n\"\"\"\nimport random\n\nTILES = ['movie_u0%d' % i for i in range(1, 8)]\nMIN_S, MAX_S = 5.0, 10.0\n\n\ndef _clipFolders():\n\tdat = op('folder_clips')\n\tif dat is None:\n\t\treturn []\n\treturn ['Hydra/clips/' + dat[r, 'name'].val for r in range(1, dat.numRows)]\n\n\ndef _players():\n\treturn [op(n) for n in TILES if op(n) is not None]\n\n\ndef _changeOneScreen(timerOp):\n\tfolders = _clipFolders()\n\tplayers = _players()\n\tif not folders or not players:\n\t\tdebug('timer_clips: nothing to switch (clips:', len(folders), 'players:', len(players), ')')\n\t\treturn\n\tlast = timerOp.fetch('lastTile', -1)\n\tchoices = [i for i in range(len(players)) if i != last] or list(range(len(players)))\n\ti = random.choice(choices)\n\tplaying = {p.par.file.eval() for p in players}\n\tfree = [f for f in folders if f not in playing] or folders\n\tplayers[i].par.file = random.choice(free)\n\ttimerOp.store('lastTile', i)\n\ttimerOp.par.length = random.uniform(MIN_S, MAX_S)\n\n\ndef onInitialize(timerOp, callCount):\n\treturn 0\n\n\ndef onReady(timerOp):\n\treturn\n\n\ndef onStart(timerOp):\n\ttimerOp.par.length = random.uniform(MIN_S, MAX_S)\n\treturn\n\n\ndef onTimerPulse(timerOp, segment):\n\treturn\n\n\ndef whileTimerActive(timerOp, segment, cycle, fraction):\n\treturn\n\n\ndef onSegmentEnter(timerOp, segment, interrupt):\n\treturn\n\n\ndef onSegmentExit(timerOp, segment, interrupt):\n\treturn\n\n\ndef onCycleStart(timerOp, segment, cycle):\n\treturn\n\n\ndef onCycleEndAlert(timerOp, segment, cycle, alertSegment, alertDone, interrupt):\n\treturn\n\n\ndef onCycle(timerOp, segment, cycle):\n\t_changeOneScreen(timerOp)\n\treturn\n\n\ndef onDone(timerOp, segment, interrupt):\n\treturn\n\n\ndef onSubrangeStart(timerOp):\n\treturn\n"
+  dat_content_format: text
+- name: folder_clips1_callbacks
+  type: textDAT
+  flags:
+  - viewer
+  - -showDocked
+  position: [2900, -7320]
+  dock: folder_clips
+  dat_content: "\"\"\"\nFolder DAT Callbacks\n\nme - this DAT\n\ndat - the DAT that is querying\ninfo - the file or folder being queried\n\tname \t\t\t\t- the name with extension\n\tbaseName \t\t\t- the name without extension\n\tpath \t\t\t\t- the full path\n\textension \t\t\t- the extension of the file\n\tfolder \t\t\t\t- the path of the folder this is in\n\tisFolder\t\t\t- true if a folder, false if a file\n\tdepth \t\t\t\t- the depth of the file/folder from the root\n\tsize \t\t\t\t- size of file or folder\n\ttype \t\t\t\t- a description of the file type\n\tdateCreated \t\t- the file or folder creation date\n\tdateModified \t\t- the file or folder last modified date\n\tdateAccessed \t\t- the file or folder last accessed date\n\"\"\"\n\nfrom typing import List, Any\n\n# Uncomment following two functions to add custom columns\n\n# def onInitGetColumnNames(dat: folderDAT) -> List[str]:\n# \t\"\"\"\n# \tCalled to initialize custom column names. Return a list of column names.\n# \t\"\"\"\n# \treturn ['digits']\n\n# def onGetValues(dat: folderDAT, info: FileEntry, row: int) -> List[Any]:\n# \t\"\"\"\n# \tCalled to get custom column values. Return a list of values corresponding\n#   to the custom columns defined in onInitGetColumnNames.\n# \t\"\"\"\n# \treturn [dat.digits]\n\n# control which folders are included\n\ndef onGetInclude(dat: folderDAT, info: FileEntry, row: int) -> bool:\n\t\"\"\"\n\tCalled to determine if a file/folder should be included.\n\t\n\tArgs:\n\t\tdat: The DAT that is querying\n\t\tinfo: The FileEntry being queried\n\t\trow: The table row index\n\t\t\n\tReturns:\n\t\tbool: True if the file/folder should be included\n\t\"\"\"\n\treturn True\n\ndef onFound(dat: folderDAT, info: FileEntry, row: int):\n\t\"\"\"\n\tCalled when a file/folder is found.\n\t\n\tArgs:\n\t\tdat: The DAT that is querying\n\t\tinfo: The FileEntry that was found\n\t\trow: The table row index\n\t\"\"\"\n\treturn\n"
+  dat_content_format: text
+annotations:
+- name: annotate1
+  mode: annotate
+  title: APC mini MIDI -> hydra page
+  text: midiin_apc reads the APC mini mk2 (device id 1 in Dialogs > MIDI Device Mapper, 0-based CC numbers). midi_to_web pushes every changed channel into the hydra page in webrender1 via executeJavaScript -> midi.set(); the sketch reads cc(n) / note(n). Faders = CC 48-56, pads = notes 0-63.
+  position: [-745, 322]
+  size: [770, 274]
+  color: [0.35, 0.5, 0.2]
+- name: annotate2
+  mode: annotate
+  title: Group 1 (red screens)
+  text: 3 rectangles from mockup screens.svg, merged with a unique group per input. Sizes and positions are expressions on ScreenMap's layout table (op.ScreenMap.Layout) -- edit the screens table or drag in ScreenMap/editor, not these parameters.
+  position: [1075, 850]
+  size: [670, 406]
+  color: [0.45, 0.2, 0.2]
+- name: annotate3
+  mode: annotate
+  title: Group 2 (green screens)
+  text: 3 rectangles, two are the 90-degree rotated ones (width/height swapped). Sizes and positions are expressions on ScreenMap's layout table (op.ScreenMap.Layout) -- edit the screens table or drag in ScreenMap/editor, not these parameters.
+  position: [1075, 355]
+  size: [670, 428]
+  color: [0.2, 0.45, 0.2]
+- name: annotate4
+  mode: annotate
+  title: Group 3 (blue screens)
+  text: 3 rectangles, one rotated. Sizes and positions are expressions on ScreenMap's layout table (op.ScreenMap.Layout) -- edit the screens table or drag in ScreenMap/editor, not these parameters.
+  position: [1075, -71]
+  size: [670, 390]
+  color: [0.2, 0.25, 0.5]
+- name: annotate5
+  mode: annotate
+  title: Unique screens (black)
+  text: 7 single rectangles, merged with a unique group per input. Sizes and positions are expressions on ScreenMap's layout table (op.ScreenMap.Layout) -- edit the screens table or drag in ScreenMap/editor, not these parameters.
+  position: [1075, -1000]
+  size: [670, 893]
+  color: [0.3, 0.3, 0.3]
+- name: annotate6
+  mode: annotate
+  title: Preset 1 -> group 1 screens
+  text: crop_pane1 takes the top third of webrender1 (preset 1, 1280x720). Group 1's bounding box is fitted into that pane at one scale (3.79 px per svg px, centred), and crop_g1_01..03 cut each red screen's own window out of it, so every crop has its screen's aspect ratio and content runs continuously across the three screens. Each crop textures its rectangle through mat_g1_xx / geo_g1_xx; cam_ortho (width 4.85 = the sheet) and render_g1 (1280x602) show the result.
+  position: [2830, 21]
+  size: [1870, 1266]
+  color: [0.45, 0.2, 0.2]
+- name: annotate7
+  mode: annotate
+  title: Preset 2 -> group 2 screens
+  text: crop_pane2 = middle third of webrender1 (preset 2). Group 2's bounding box fitted into the pane at 4.0 px per svg px, centred; crop_g2_01..03 cut each green screen's window (two are the rotated screens, portrait crops). select_g2_01..03 pull each screen's rectangle (rect_g2_xx) by reference, mat_g2_xx / geo_g2_xx texture them; render1 uses the shared cameraViewport.
+  position: [2830, -2070]
+  size: [1870, 1170]
+  color: [0.2, 0.45, 0.2]
+- name: annotate8
+  mode: annotate
+  title: Preset 3 -> group 3 screens
+  text: crop_pane3 = bottom third of webrender1 (preset 3). Group 3's bounding box fitted at 3.99 px per svg px, centred; crop_g3_01..03 cut each blue screen's window (03 is the rotated one). select_g3_01..03 pull each screen's rectangle (rect_g3_xx) by reference, mat_g3_xx / geo_g3_xx texture them; render1 uses the shared cameraViewport.
+  position: [2830, -3670]
+  size: [1870, 1170]
+  color: [0.2, 0.25, 0.5]
+- name: annotate9
+  mode: annotate
+  title: Rendered clips -> non-interactive screens
+  text: The 7 small screens play PNG sequences instead of live hydra. movie_u01..07 (Movie File In, sequential, sample rate overridden to 60) each read a clip folder under Hydra/clips (320x180, 600 frames, rendered offline by Hydra/tools/render-clips.mjs from random presets). crop_u01..07 centre-crop the 320x180 clip to that screen's aspect in whole pixels (nearest filtering); select_u01..07 pull each screen's rectangle (rect_unique_xx) by reference, mat_uxx / geo_uxx texture them. folder_clips lists the clip folders; timer_clips cycles every random 5..10 s and its callbacks swap ONE random screen to a clip not already playing (never the same screen twice in a row). The browser wall no longer renders these screens. window_u01..07 (Window COMPs, closed until opened) output each crop_u0N to the display and pixel size given in ScreenMap's screens table; a 0 px size falls back to the crop's own resolution.
+  position: [2830, -7450]
+  size: [1870, 3350]
+  color: [0.3, 0.3, 0.3]

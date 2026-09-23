@@ -1,0 +1,215 @@
+{
+  "params": {
+    "Aiclient": {
+      "val": "claudecode"
+    },
+    "Aiprojectroot": {
+      "val": "projectfolder"
+    },
+    "Aiprojectrootcustom": {
+      "val": ""
+    },
+    "Autoexternalize": {
+      "val": "neither"
+    },
+    "Autoupdate": {
+      "val": "notify"
+    },
+    "Clipboardautopaste": {
+      "val": true
+    },
+    "Clonetagcolorb": {
+      "val": 0.1
+    },
+    "Clonetagcolorg": {
+      "val": 0.7
+    },
+    "Clonetagcolorr": {
+      "val": 1.0
+    },
+    "Configclient": {
+      "val": "claudecode"
+    },
+    "Convoyenable": {
+      "val": false
+    },
+    "Convoyremotewake": {
+      "val": true
+    },
+    "Convoywakegrace": {
+      "val": 60.0
+    },
+    "Csvtag": {
+      "val": "csv"
+    },
+    "Datrestoreonstart": {
+      "val": true
+    },
+    "Dattag": {
+      "val": "dat"
+    },
+    "Dattagcolorb": {
+      "val": 0.4
+    },
+    "Dattagcolorg": {
+      "val": 0.3
+    },
+    "Dattagcolorr": {
+      "val": 0.9
+    },
+    "Detectduplicatepaths": {
+      "val": true
+    },
+    "Embeddatsintdxns": {
+      "val": false
+    },
+    "Embedstorageintdxns": {
+      "val": true
+    },
+    "Embodymode": {
+      "val": "auto"
+    },
+    "Enablekeyboardshortcuts": {
+      "val": true
+    },
+    "Envoyenable": {
+      "val": true
+    },
+    "Envoyport": {
+      "val": 9870
+    },
+    "Filecleanup": {
+      "val": "keep"
+    },
+    "Folder": {
+      "val": ""
+    },
+    "Glsltag": {
+      "val": "glsl"
+    },
+    "Htmltag": {
+      "val": "html"
+    },
+    "Jsontag": {
+      "val": "json"
+    },
+    "Localtimestamps": {
+      "val": true
+    },
+    "Logfolder": {
+      "val": "logs"
+    },
+    "Logtofile": {
+      "val": true
+    },
+    "Mdtag": {
+      "val": "md"
+    },
+    "Print": {
+      "val": true
+    },
+    "Pytag": {
+      "val": "py"
+    },
+    "Rtftag": {
+      "val": "rtf"
+    },
+    "Shortcutcopytdxn": {
+      "val": "cmd+shift+c"
+    },
+    "Shortcutexportcomp": {
+      "val": "cmd+alt+e"
+    },
+    "Shortcutexportproject": {
+      "val": "cmd+shift+e"
+    },
+    "Shortcutmanager": {
+      "val": "cmd+shift+o"
+    },
+    "Shortcutrefresh": {
+      "val": "cmd+shift+r"
+    },
+    "Shortcuttagger": {
+      "val": "lctrl"
+    },
+    "Shortcutupdateall": {
+      "val": "cmd+shift+u"
+    },
+    "Shortcutupdatecomp": {
+      "val": "cmd+alt+u"
+    },
+    "Taggingmenucolorb": {
+      "val": 0.2
+    },
+    "Taggingmenucolorg": {
+      "val": 0.2
+    },
+    "Taggingmenucolorr": {
+      "val": 0.2
+    },
+    "Tdxncascade": {
+      "val": false
+    },
+    "Tdxncreateonstart": {
+      "val": true
+    },
+    "Tdxndatsafety": {
+      "val": "ask"
+    },
+    "Tdxnexcludetag": {
+      "val": "tdxn_exclude"
+    },
+    "Tdxnmode": {
+      "val": "export"
+    },
+    "Tdxnstriponsave": {
+      "val": true
+    },
+    "Tdxntag": {
+      "val": "tdxn"
+    },
+    "Tdxntagcolorb": {
+      "val": 0.9
+    },
+    "Tdxntagcolorg": {
+      "val": 0.5
+    },
+    "Tdxntagcolorr": {
+      "val": 0.3
+    },
+    "Templatemaster": {
+      "val": "__template__"
+    },
+    "Toxdropexpr": {
+      "val": "ask"
+    },
+    "Toxrestoreonstart": {
+      "val": true
+    },
+    "Toxtag": {
+      "val": "tox"
+    },
+    "Toxtagcolorb": {
+      "val": 0.3
+    },
+    "Toxtagcolorg": {
+      "val": 0.8
+    },
+    "Toxtagcolorr": {
+      "val": 0.325
+    },
+    "Tsvtag": {
+      "val": "tsv"
+    },
+    "Txttag": {
+      "val": "txt"
+    },
+    "Verbose": {
+      "val": false
+    },
+    "Xmltag": {
+      "val": "xml"
+    }
+  },
+  "version": 1
+}

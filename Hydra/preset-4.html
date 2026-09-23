@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hydra preset 4</title>
+  <script src="https://cdn.jsdelivr.net/npm/hydra-synth/dist/hydra-synth.js"></script>
+  <script src="lib/midi.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+    #hydra-canvas { display: block; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; background: #000; }
+    #code {
+      position: fixed; inset: 0; margin: 0; padding: 24px; box-sizing: border-box;
+      overflow: auto; color: #fff; background: rgba(0,0,0,0.55);
+      font: 13px/1.45 Menlo, Consolas, monospace; white-space: pre; z-index: 10;
+    }
+    #code[hidden] { display: none; }
+    #err { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; padding: 8px 12px; color: #f66; background: rgba(0,0,0,0.8); font: 12px/1.4 monospace; white-space: pre-wrap; z-index: 20; }
+    #err[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <canvas id="hydra-canvas"></canvas>
+  <!-- code is hidden by default; press Ctrl+Shift+H to show / hide it -->
+  <pre id="code" hidden></pre>
+  <pre id="err" hidden></pre>
+
+  <script id="sketch" type="text/plain">
+await loadScript("https://metagrowing.org/extra-shaders-for-hydra/lib-noise.js")
+await loadScript("https://metagrowing.org/extra-shaders-for-hydra/lib-screen.js")
+await loadScript("https://cdn.jsdelivr.net/gh/geikha/hyper-hydra@latest/hydra-blend.js")
+await loadScript("https://cdn.jsdelivr.net/gh/geikha/hyper-hydra@latest/hydra-arithmetics.js")
+
+const seed1 = 123
+const seed2 = 124
+
+const blendDt    = (amt) => amt
+const contrastDt = (amt) => amt
+const sortDirX   = () => 1
+const sortDirY   = () => 1
+const gridScale  = () => 1
+
+const pal = {
+  cBlack:  { r: 0.7450980392156863, g: 1, b: 0.6901960784313725 },
+  cMid:    { r: 0.6980392156862745, g: 0.9372549019607843, b: 0.3333333333333333 },
+  cWhite:  { r: 1, g: 1, b: 1 },
+  cDither: { r: 0.7058823529411765, g: 0.42745098039215684, b: 1 },
+}
+
+// VISUAL LAYER 1
+osc(() => 51, () => 0.037, () => 0)
+  .rotate(() => 1.57, () => 2)
+  .modulate(noise(() => 8, () => 9.1).pixelate(() => 33, () => 8).rotate(() => seed1, () => 5.55))
+  .modulateRotate(noise(() => 5.300000000000001, () => 0.5).rotate(() => seed1, () => 0.75), () => 1.2850000000000001)
+  .scale(() => 3)
+  .pixelate(() => 266, () => 227)
+  .out(o4)
+
+// VISUAL LAYER 2
+osc(() => 54, () => 0.21999999999999997, () => 0)
+  .rotate(() => 4.29, () => 1.25)
+  .modulate(noise(() => 6.3, () => 0.42000000000000004).pixelate(() => 50, () => 6).rotate(() => seed2, () => 5.05))
+  .modulateRotate(noise(() => 4.3999999999999995, () => 0.5).rotate(() => seed2, () => 0.75), () => 1.57)
+  .scale(() => 8.5)
+  .pixelate(() => 344, () => 2554)
+  .out(o6)
+
+// VISUAL LAYER 3
+unoise(() => 5.2, () => 0.1).pixelate(() => 256, () => 256)
+  .darken(unoise(() => 5.2, () => 0.1).pixelate(() => 128, () => 128))
+  .darken(unoise(() => 5.2, () => 0.1).pixelate(() => 64, () => 64))
+  .darken(unoise(() => 5.2, () => 0.1).pixelate(() => 32, () => 32))
+  .darken(unoise(() => 5.2, () => 0.1).pixelate(() => 16, () => 16))
+  .darken(unoise(() => 5.2, () => 0.1).pixelate(() => 8, () => 8))
+  .darken(unoise(() => 5.2, () => 0.1).pixelate(() => 4, () => 4))
+  .darken(unoise(() => 5.2, () => 0.1).pixelate(() => 2, () => 2))
+  .amp(() => 20)
+  .mod(() => 1.001)
+  .out(o0)
+
+// MERGE LAYER 1 & 2
+src(o1)
+  .pysort(() => 0.222, () => window.frame++, 0, sortDirY())
+  .blend(src(o4).blend(o6, () => 6.763).blend(o0, () => 4.1850000000000005), () => blendDt(1.9060000000000001))
+  .contrast(() => contrastDt(1.2670000000000001))
+  .out(o1)
+
+// GREEN PIXELS LAYER
+src(o5)
+  .invert()
+  .pxsort(() => 2.23, () => window.frame++, sortDirX(), 0)
+  .blend(o1, () => blendDt(0.155))
+  .contrast(() => contrastDt(1.001))
+  .out(o5)
+
+const greenPixels = () =>
+  solid(() => pal.cDither.r, () => pal.cDither.g, () => pal.cDither.b)
+    .mask(src(o5).diff(src(o1).scrollY(() => 4.0765)).thresh(() => 0.4, () => 0.4).dither4(gridScale()))
+
+// COLOR LAYER 1
+const midMask = () => src(o1).thresh(() => 0.1).mult(src(o1).thresh(() => 0.8).invert())
+
+solid(() => pal.cBlack.r, () => pal.cBlack.g, () => pal.cBlack.b)
+  .mult(src(o1).thresh(() => 0.1).invert())
+  .add(solid(() => pal.cMid.r, () => pal.cMid.g, () => pal.cMid.b).mult(midMask()))
+  .add(solid(() => pal.cWhite.r, () => pal.cWhite.g, () => pal.cWhite.b).mult(src(o1).thresh(() => 0.8)))
+  .out(o2)
+
+// POST PROCESSING
+const highMask = () => src(o1).thresh(() => 0.8, () => 0.15)
+
+src(o2)
+  .modulate(noise(() => 603, () => 5), () => 0.002)
+  .mult(osc(() => 502000).add(solid(() => 0.6, () => 0.6, () => 0.6)))
+  .add(noise(() => 331, () => 20).luma(() => 0.6, () => 0.1), () => 0.15)
+  .modulate(osc(() => 1.5, () => 0.3, () => 0), () => 0.005)
+  .scale(() => 1.02, () => 1.02, () => 1)
+  .brightness(() => -0.1)
+  .mult(highMask().invert())
+  .add(src(o2).add(noise(() => 500, () => 20).luma(() => 0.6, () => 0.1), () => 0.15).mult(highMask()))
+  .layer(greenPixels())
+  .out(o3)
+
+
+window.baseSpeed = 0.053
+speed = window.baseSpeed
+
+render(o3)
+  </script>
+
+  <script>
+    // ---- canvas size: window size by default, or ?res=1920x1080 for a fixed
+    // render resolution scaled to fill the window (cropping the overflow)
+    const canvas = document.getElementById('hydra-canvas')
+    const resParam = new URLSearchParams(location.search).get('res')
+    const fixed = resParam && /^\d+x\d+$/.test(resParam) ? resParam.split('x').map(Number) : null
+    canvas.width = fixed ? fixed[0] : window.innerWidth
+    canvas.height = fixed ? fixed[1] : window.innerHeight
+
+    const hydra = new Hydra({
+      canvas,
+      detectAudio: false,
+      precision: 'mediump',
+      numOutputs: 8,
+      numSources: 8,
+    })
+    window.hydraSynth = hydra
+
+    if (!fixed) {
+      window.addEventListener('resize', () => hydra.setResolution(window.innerWidth, window.innerHeight))
+    }
+
+    // ---- code overlay (hidden by default)
+    const source = document.getElementById('sketch').textContent.trim()
+    const codeEl = document.getElementById('code')
+    codeEl.textContent = source
+    window.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.code === 'KeyH') {
+        e.preventDefault()
+        codeEl.hidden = !codeEl.hidden
+      }
+    })
+
+    // ---- run the sketch (wrapped so top-level await works, like the editor)
+    const errEl = document.getElementById('err')
+    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor
+    new AsyncFunction(source)().catch((err) => {
+      console.error(err)
+      errEl.textContent = String(err && err.stack || err)
+      errEl.hidden = false
+    })
+  </script>
+</body>
+</html>
