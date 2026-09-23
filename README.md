@@ -62,7 +62,7 @@ module in the Textport (right-click the DAT to see its path):
 op('<network>/midi_to_web').module.pushAll()
 ```
 
-### Fader map
+### MIDI controls
 
 Faders are **additive**: each one adds to the preset's own value and the result is clamped
 to the value rules. A fader at rest leaves the preset untouched. The map lives in the header
