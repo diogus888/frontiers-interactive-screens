@@ -82,10 +82,11 @@ of `Hydra/presets/template.js`, which is the source of truth.
 
 Pads (notes 0..63) are not mapped yet.
 
-## Extra: mapping tool inside TouchDesigner
+## Extra (optional): mapping tool inside TouchDesigner
 
-The `ScreenMap` COMP in `/project1` holds the physical screen layout and drives the
-mockup and the crops from one table.
+This is not needed to run the wall. It is only for changing where the screens sit or how
+big they are. The `ScreenMap` COMP in `/project1` holds the physical screen layout and
+drives the mockup and the crops from one table.
 
 - **`screens` table** is the single source of truth, one row per screen: centre `xcm`/`ycm`
   and size `wcm`/`hcm` in centimetres, native `pxw`/`pxh` (0 = unknown), output `display`
