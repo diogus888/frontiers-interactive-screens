@@ -1,0 +1,490 @@
+{
+  "rendered": "2026-09-21T15:42:49.616Z",
+  "width": 320,
+  "height": 180,
+  "fps": 60,
+  "frames": 600,
+  "warmupFrames": 600,
+  "clips": [
+    {
+      "index": 1,
+      "preset": 195,
+      "dir": "clip-01_preset-195",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.2
+    },
+    {
+      "index": 2,
+      "preset": 1,
+      "dir": "clip-02_preset-1",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.1
+    },
+    {
+      "index": 3,
+      "preset": 164,
+      "dir": "clip-03_preset-164",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.7
+    },
+    {
+      "index": 4,
+      "preset": 305,
+      "dir": "clip-04_preset-305",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7
+    },
+    {
+      "index": 5,
+      "preset": 300,
+      "dir": "clip-05_preset-300",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.4
+    },
+    {
+      "index": 6,
+      "preset": 87,
+      "dir": "clip-06_preset-87",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 9.4
+    },
+    {
+      "index": 7,
+      "preset": 190,
+      "dir": "clip-07_preset-190",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.6
+    },
+    {
+      "index": 8,
+      "preset": 224,
+      "dir": "clip-08_preset-224",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.9
+    },
+    {
+      "index": 9,
+      "preset": 131,
+      "dir": "clip-09_preset-131",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.7
+    },
+    {
+      "index": 10,
+      "preset": 309,
+      "dir": "clip-10_preset-309",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.6
+    },
+    {
+      "index": 11,
+      "preset": 228,
+      "dir": "clip-11_preset-228",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 10.2
+    },
+    {
+      "index": 12,
+      "preset": 100,
+      "dir": "clip-12_preset-100",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.3
+    },
+    {
+      "index": 13,
+      "preset": 88,
+      "dir": "clip-13_preset-88",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.2
+    },
+    {
+      "index": 14,
+      "preset": 166,
+      "dir": "clip-14_preset-166",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.2
+    },
+    {
+      "index": 15,
+      "preset": 271,
+      "dir": "clip-15_preset-271",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.5
+    },
+    {
+      "index": 16,
+      "preset": 196,
+      "dir": "clip-16_preset-196",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 11.5
+    },
+    {
+      "index": 17,
+      "preset": 152,
+      "dir": "clip-17_preset-152",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.9
+    },
+    {
+      "index": 18,
+      "preset": 109,
+      "dir": "clip-18_preset-109",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.4
+    },
+    {
+      "index": 19,
+      "preset": 243,
+      "dir": "clip-19_preset-243",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.2
+    },
+    {
+      "index": 20,
+      "preset": 35,
+      "dir": "clip-20_preset-35",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.2
+    },
+    {
+      "index": 21,
+      "preset": 244,
+      "dir": "clip-21_preset-244",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.8
+    },
+    {
+      "index": 22,
+      "preset": 61,
+      "dir": "clip-22_preset-61",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.9
+    },
+    {
+      "index": 23,
+      "preset": 130,
+      "dir": "clip-23_preset-130",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.8
+    },
+    {
+      "index": 24,
+      "preset": 259,
+      "dir": "clip-24_preset-259",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.3
+    },
+    {
+      "index": 25,
+      "preset": 179,
+      "dir": "clip-25_preset-179",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 9.1
+    },
+    {
+      "index": 26,
+      "preset": 43,
+      "dir": "clip-26_preset-43",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.9
+    },
+    {
+      "index": 27,
+      "preset": 208,
+      "dir": "clip-27_preset-208",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.7
+    },
+    {
+      "index": 28,
+      "preset": 112,
+      "dir": "clip-28_preset-112",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.9
+    },
+    {
+      "index": 29,
+      "preset": 299,
+      "dir": "clip-29_preset-299",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.5
+    },
+    {
+      "index": 30,
+      "preset": 13,
+      "dir": "clip-30_preset-13",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.3
+    },
+    {
+      "index": 31,
+      "preset": 283,
+      "dir": "clip-31_preset-283",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.9
+    },
+    {
+      "index": 32,
+      "preset": 20,
+      "dir": "clip-32_preset-20",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.4
+    },
+    {
+      "index": 33,
+      "preset": 40,
+      "dir": "clip-33_preset-40",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 12.3
+    },
+    {
+      "index": 34,
+      "preset": 60,
+      "dir": "clip-34_preset-60",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.5
+    },
+    {
+      "index": 35,
+      "preset": 3,
+      "dir": "clip-35_preset-3",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.5
+    },
+    {
+      "index": 36,
+      "preset": 290,
+      "dir": "clip-36_preset-290",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.3
+    },
+    {
+      "index": 37,
+      "preset": 140,
+      "dir": "clip-37_preset-140",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.6
+    },
+    {
+      "index": 38,
+      "preset": 198,
+      "dir": "clip-38_preset-198",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 14.5
+    },
+    {
+      "index": 39,
+      "preset": 306,
+      "dir": "clip-39_preset-306",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.3
+    },
+    {
+      "index": 40,
+      "preset": 73,
+      "dir": "clip-40_preset-73",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.3
+    },
+    {
+      "index": 41,
+      "preset": 145,
+      "dir": "clip-41_preset-145",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.5
+    },
+    {
+      "index": 42,
+      "preset": 107,
+      "dir": "clip-42_preset-107",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.5
+    },
+    {
+      "index": 43,
+      "preset": 18,
+      "dir": "clip-43_preset-18",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.9
+    },
+    {
+      "index": 44,
+      "preset": 162,
+      "dir": "clip-44_preset-162",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 9.1
+    },
+    {
+      "index": 45,
+      "preset": 31,
+      "dir": "clip-45_preset-31",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 11.4
+    },
+    {
+      "index": 46,
+      "preset": 21,
+      "dir": "clip-46_preset-21",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 9
+    },
+    {
+      "index": 47,
+      "preset": 295,
+      "dir": "clip-47_preset-295",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8
+    },
+    {
+      "index": 48,
+      "preset": 249,
+      "dir": "clip-48_preset-249",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.9
+    },
+    {
+      "index": 49,
+      "preset": 2,
+      "dir": "clip-49_preset-2",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 11.6
+    },
+    {
+      "index": 50,
+      "preset": 303,
+      "dir": "clip-50_preset-303",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.9
+    },
+    {
+      "index": 51,
+      "preset": 26,
+      "dir": "clip-51_preset-26",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.4
+    },
+    {
+      "index": 52,
+      "preset": 297,
+      "dir": "clip-52_preset-297",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.7
+    },
+    {
+      "index": 53,
+      "preset": 165,
+      "dir": "clip-53_preset-165",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.2
+    },
+    {
+      "index": 54,
+      "preset": 65,
+      "dir": "clip-54_preset-65",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 7.1
+    },
+    {
+      "index": 55,
+      "preset": 211,
+      "dir": "clip-55_preset-211",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.3
+    },
+    {
+      "index": 56,
+      "preset": 19,
+      "dir": "clip-56_preset-19",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.3
+    },
+    {
+      "index": 57,
+      "preset": 239,
+      "dir": "clip-57_preset-239",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 8.1
+    },
+    {
+      "index": 58,
+      "preset": 278,
+      "dir": "clip-58_preset-278",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.7
+    },
+    {
+      "index": 59,
+      "preset": 254,
+      "dir": "clip-59_preset-254",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 9.3
+    },
+    {
+      "index": 60,
+      "preset": 137,
+      "dir": "clip-60_preset-137",
+      "frames": 600,
+      "identicalConsecutiveFrames": 0,
+      "seconds": 6.8
+    }
+  ]
+}
