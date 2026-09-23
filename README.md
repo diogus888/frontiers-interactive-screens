@@ -82,27 +82,6 @@ of `Hydra/presets/template.js`, which is the source of truth.
 
 Pads (notes 0..63) are not mapped yet.
 
-## Presets
-
-The template owns the code, the JSONs own the values. Never edit a generated
-`preset-N.js` or `main-N.js`; its header says GENERATED.
-
-- `Hydra/presets/template.js`: the one sketch (structure, helpers, fader map).
-- `Hydra/presets/json/*.json`: exports from the Frontiers app, one per preset.
-  Numbering follows the sorted file names.
-- `Hydra/presets/3 Main screens/`: the three interactive screens. The PNGs carry the
-  full preset JSON in a `paradigm` tEXt chunk; the extracted JSONs sit in its `json/` folder.
-
-Regenerate after adding a JSON or editing the template (run from the `Hydra` folder):
-
-```bat
-node tools/presets-from-json.mjs
-node tools/presets-from-json.mjs --json "presets/3 Main screens/json" --prefix main
-```
-
-Then reload the page. `unique-N.js` come from the older `tools/json-to-sketch.mjs`
-and have no MIDI map by design.
-
 ## Clips for the non-interactive screens
 
 `Hydra/clips/clip-NN_preset-N/` are 600-frame PNG sequences rendered from the presets by
