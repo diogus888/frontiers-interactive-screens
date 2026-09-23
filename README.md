@@ -42,13 +42,7 @@ opening the .toe, or reload the Web Render TOP afterwards.
 
 ## 3. MIDI setup (APC mini mk2)
 
-The sketches read the faders through `Hydra/lib/midi.js`. There are two ways the
-controller reaches them, and they cannot be used at the same time: Windows hands a MIDI
-port to one application only.
-
-### In TouchDesigner (the wall)
-
-The embedded Chromium inside a Web Render TOP has no MIDI permission dialog, so Web MIDI
+The sketches read the faders through `Hydra/lib/midi.js`. The embedded Chromium inside a Web Render TOP has no MIDI permission dialog, so Web MIDI
 never works there. TouchDesigner reads the controller itself and pushes the values into
 the page:
 
@@ -67,15 +61,6 @@ module in the Textport (right-click the DAT to see its path):
 ```python
 op('<network>/midi_to_web').module.pushAll()
 ```
-
-### In Chrome (previewing a sketch)
-
-1. Close TouchDesigner, or at least make sure it is not using the APC.
-2. Open a sketch at `http://localhost:8080/main-1`. It must be `localhost`: Web MIDI needs
-   a secure context, so a plain `http://<ip>` page will not get MIDI.
-3. Chrome asks once for permission to use MIDI devices. Allow it.
-4. Press **Ctrl+Shift+M** on the page to open the MIDI monitor. It lists the connected
-   inputs and prints every incoming message, so you can see which CC a fader sends.
 
 ### Fader map
 
