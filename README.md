@@ -82,6 +82,25 @@ of `Hydra/presets/template.js`, which is the source of truth.
 
 Pads (notes 0..63) are not mapped yet.
 
+## Extra: mapping tool inside TouchDesigner
+
+The `ScreenMap` COMP in `/project1` holds the physical screen layout and drives the
+mockup and the crops from one table.
+
+- **`screens` table** is the single source of truth, one row per screen: centre `xcm`/`ycm`
+  and size `wcm`/`hcm` in centimetres, native `pxw`/`pxh` (0 = unknown), output `display`
+  index, and `depth` (0 = the back). Edit this table, never the mockup rectangles or crops
+  directly; the layout is rebuilt automatically on every edit.
+- **Editor panel**: pulse `window_editor` inside `ScreenMap` to open it. Left-drag a screen
+  tile to move it (positions snap to the *Drag Snap (cm)* parameter), right-click a tile to
+  send that screen to the back. Hovering a tile of an interactive group shows that group's
+  whole hydra pane behind it.
+- **Parameters** on the COMP: cm per world unit, group canvas size (the 1280x720 hydra pane
+  the interactive crops cut from), editor view centre and width, snap, hover ghost opacity,
+  and a Rebuild Layout pulse.
+- The `window_u01..u07` COMPs in `base1` output the non-interactive screens at the size
+  and display index from the table.
+
 ## Clips for the non-interactive screens
 
 `Hydra/clips/clip-NN_preset-N/` are 600-frame PNG sequences rendered from the presets by
