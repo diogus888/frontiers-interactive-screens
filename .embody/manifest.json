@@ -9,6 +9,16 @@
       "kind": "json_key",
       "marker": "permissions (Envoy tools + temp read dirs + worktree access)",
       "path": ".claude/settings.local.json"
+    },
+    {
+      "kind": "block",
+      "marker": "# Embody / Envoy",
+      "path": ".gitignore"
+    },
+    {
+      "kind": "block",
+      "marker": "Embody / Envoy",
+      "path": ".gitattributes"
     }
   ],
   "files_created": [

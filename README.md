@@ -14,7 +14,12 @@ The seven non-interactive screens play pre-rendered clips from `Hydra/clips/`.
 
 ## 1. Start the hydra server
 
-Double-click **`Start Hydra server.bat`** in this folder.
+On Windows, double-click **`Start Hydra server (Windows).bat`** in this folder.
+
+On a Mac, double-click **`Start Hydra server (Mac).command`** instead. It does the same checks
+and opens in Terminal. The first time, make it executable once from Terminal:
+`chmod +x "Start Hydra server (Mac).command"`. If macOS blocks it as coming from an unidentified
+developer, right-click it and choose **Open**.
 
 It opens a console window, checks that Node is installed and that port 8080 is free,
 then runs `Hydra/serve-presets.mjs`. The server is up when the window says

@@ -32,3 +32,17 @@ node_modules/
 Thumbs.db
 desktop.ini
 # Hydra/hydra is a git submodule (diogus888/hydra-unlimited-buffers); its own .gitignore excludes the font and renders.
+
+# Embody / Envoy (auto-managed)
+CrashAutoSave*
+.tdn_backup/
+opencode.json
+.cursor/mcp.json
+.vscode/mcp.json
+.gemini/settings.json
+.codex/config.toml
+.agents/mcp_config.json
+**/.embody/*
+!**/.embody/project.json
+.claude/projects/
+__pycache__/

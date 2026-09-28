@@ -5,3 +5,16 @@
 *.jpg binary -delta
 *.otf binary
 *.mp4 binary -delta
+
+# Embody / Envoy -- normalize TD line endings (auto-managed)
+*.py text eol=lf
+*.md text eol=lf
+*.tdxn text eol=lf diff=tdxn
+*.tdn text eol=lf diff=tdxn
+*.json text eol=lf
+*.tsv text eol=lf
+*.xml text eol=lf
+*.toe binary
+*.tox binary
+*.command text eol=lf
+*.sh text eol=lf
