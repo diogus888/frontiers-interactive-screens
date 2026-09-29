@@ -1,6 +1,6 @@
 format: tdxn
 version: '2.1'
-build: 14
+build: 15
 generator: Embody/6.2.56
 td_build: 099.2025.33230
 network_path: /project1/base1
@@ -37,8 +37,10 @@ type_defaults:
     color: [0.67, 0.67, 0.67]
   moviefileinTOP:
     parameters:
-      index: =me.time.frame
+      file: Hydra/clips-all.mov
+      index: =int(op('clip_state')[me.name, 'start']) + (int(absTime.frame) - int(op('clip_state')[me.name, 't0'])) % 600
       overridesample: true
+      playmode: specify
       prereadframes: 10
       samplerate: 60
       timecodeop: =tdu.Timecode()
@@ -65,11 +67,6 @@ type_defaults:
       top: null1
     flags:
     - viewer
-    size: [130, 90]
-    color: [0.67, 0.67, 0.67]
-  textDAT:
-    parameters:
-      language: python
     size: [130, 90]
     color: [0.67, 0.67, 0.67]
   windowCOMP:
@@ -430,6 +427,13 @@ operators:
   position: [3300, -6800]
   inputs:
   - movie_u07
+- name: clip_list
+  type: fileinDAT
+  parameters:
+    file: Hydra/clips-all.txt
+  position: [2900, -7200]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
 - name: geo_g1_01
   type: geometryCOMP
   parameters:
@@ -614,41 +618,66 @@ operators:
   position: [3700, -3600]
 - name: movie_u01
   type: moviefileinTOP
-  parameters:
-    file: Hydra/clips/clip-51_preset-26
   position: [2900, -4400]
 - name: movie_u02
   type: moviefileinTOP
-  parameters:
-    file: Hydra/clips/clip-49_preset-2
   position: [2900, -4800]
 - name: movie_u03
   type: moviefileinTOP
-  parameters:
-    file: Hydra/clips/clip-59_preset-254
   position: [2900, -5200]
 - name: movie_u04
   type: moviefileinTOP
-  parameters:
-    file: Hydra/clips/clip-22_preset-61
   position: [2900, -5600]
 - name: movie_u05
   type: moviefileinTOP
-  parameters:
-    file: Hydra/clips/clip-07_preset-190
   position: [2900, -6000]
 - name: movie_u06
   type: moviefileinTOP
-  parameters:
-    file: Hydra/clips/clip-54_preset-65
   position: [2900, -6400]
 - name: movie_u07
   type: moviefileinTOP
-  parameters:
-    file: Hydra/clips/clip-31_preset-283
   flags:
   - viewer
   position: [2900, -6800]
+- name: clip_state
+  type: tableDAT
+  position: [3300, -7200]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  dat_content:
+  - - name
+    - clip
+    - start
+    - t0
+  - - movie_u01
+    - clip-43_preset-18
+    - '25200'
+    - '26730'
+  - - movie_u02
+    - clip-52_preset-297
+    - '30600'
+    - '25899'
+  - - movie_u03
+    - clip-11_preset-228
+    - '6000'
+    - '25542'
+  - - movie_u04
+    - clip-18_preset-109
+    - '10200'
+    - '27635'
+  - - movie_u05
+    - clip-56_preset-19
+    - '33000'
+    - '26397'
+  - - movie_u06
+    - clip-32_preset-20
+    - '18600'
+    - '27045'
+  - - movie_u07
+    - clip-12_preset-100
+    - '6600'
+    - '0'
+  dat_content_format: table
 - name: crop_g1_01
   type: cropTOP
   parameters:
@@ -1084,35 +1113,6 @@ operators:
     def whileOff(channel, sampleIndex, val, prev):
         return
   dat_content_format: text
-- name: timer_clips
-  type: timerCHOP
-  parameters:
-    length: 9.1932304591
-    cycle: true
-    cyclelimit: false
-    callbacks: timer_clips1_callbacks
-    exttcop: =tdu.Timecode()
-    rate: =me.time.rate
-    autoexportroot: =parent()
-  flags:
-  - viewer
-  position: [3300, -7200]
-  size: [130, 90]
-  color: [0.67, 0.67, 0.67]
-  storage:
-    lastTile: 6
-- name: folder_clips
-  type: folderDAT
-  parameters:
-    rootfolder: Hydra/clips
-    type: folders
-    callbacks: folder_clips1_callbacks
-  flags:
-  - viewer
-  position: [2900, -7200]
-  size: [130, 90]
-  color: [0.67, 0.67, 0.67]
-  dat_read_only: true
 - name: merge_group1
   type: mergePOP
   sequences:
@@ -1220,6 +1220,19 @@ operators:
   parameters:
     pop: rect_g3_03
   position: [3700, -3400]
+- name: clip_switcher
+  type: executeDAT
+  parameters:
+    fromop: =parent()
+    framestart: true
+  position: [3700, -7200]
+  size: [130, 90]
+  color: [0.67, 0.67, 0.67]
+  storage:
+    lastRow: 4
+    nextSwitch: 468.7342366691
+  dat_content: "\"\"\"Clip switcher for the NON-INTERACTIVE screens (movie_u01..movie_u07).\n\nAll clips live in ONE HAP movie, Hydra/clips-all.mov: 600 frames per clip, in the\norder listed by clip_list (Hydra/clips-all.txt). Each player uses Specify Index and\nreads its row of clip_state: start = first frame of its clip, t0 = absTime.frame when\nthe clip began. Every random 5..10 s one random screen (never the one changed last\ntime) gets a clip not already playing. Switching rewrites table cells only -- no file\nis opened or closed at runtime (swapping PNG-sequence folders crashed TD on the Mac).\n\"\"\"\nimport random\n\nCLIP_FRAMES = 600\nMIN_S, MAX_S = 5.0, 10.0\n\n\ndef _switchOneScreen():\n\tstate = op('clip_state')\n\tnames = op('clip_list').text.split()\n\tscreens = list(range(1, state.numRows))\n\tlast = me.fetch('lastRow', -1)\n\trow = random.choice([r for r in screens if r != last] or screens)\n\tplaying = {state[r, 'clip'].val for r in screens}\n\tclip = random.choice([n for n in names if n not in playing] or names)\n\tstate[row, 'clip'] = clip\n\tstate[row, 'start'] = names.index(clip) * CLIP_FRAMES\n\tstate[row, 't0'] = int(absTime.frame)\n\tme.store('lastRow', row)\n\n\ndef onFrameStart(frame):\n\tnow = absTime.seconds\n\tdue = me.fetch('nextSwitch', 0.0)\n\tif due - now > MAX_S:  # stale value saved from an earlier session\n\t\tdue = 0.0\n\tif now >= due:\n\t\tif due:\n\t\t\t_switchOneScreen()\n\t\tme.store('nextSwitch', now + random.uniform(MIN_S, MAX_S))\n\treturn\n"
+  dat_content_format: text
 - name: rect_unique_01
   type: rectanglePOP
   parameters:
@@ -1283,23 +1296,6 @@ operators:
     ty: =op.ScreenMap.Layout('u07','ty')
     tz: =op.ScreenMap.Layout('u07', 'tz')
   position: [1150, -913]
-- name: timer_clips1_callbacks
-  type: textDAT
-  flags:
-  - viewer
-  position: [3300, -7320]
-  dock: timer_clips
-  dat_content: "\"\"\"Timer CHOP callbacks for timer_clips -- the NON-INTERACTIVE screens' clip switcher.\n\nEvery cycle (a random 5..10 s) one random screen (never the one changed last time) gets a\nrandom clip folder from folder_clips (never a clip already playing on another screen), and\nthe next cycle length is re-randomised. Players are movie_u01..movie_u07, each a Movie File\nIn reading a PNG sequence folder under Hydra/clips (rendered by Hydra/tools/render-clips.mjs).\n\"\"\"\nimport random\n\nTILES = ['movie_u0%d' % i for i in range(1, 8)]\nMIN_S, MAX_S = 5.0, 10.0\n\n\ndef _clipFolders():\n\tdat = op('folder_clips')\n\tif dat is None:\n\t\treturn []\n\treturn ['Hydra/clips/' + dat[r, 'name'].val for r in range(1, dat.numRows)]\n\n\ndef _players():\n\treturn [op(n) for n in TILES if op(n) is not None]\n\n\ndef _changeOneScreen(timerOp):\n\tfolders = _clipFolders()\n\tplayers = _players()\n\tif not folders or not players:\n\t\tdebug('timer_clips: nothing to switch (clips:', len(folders), 'players:', len(players), ')')\n\t\treturn\n\tlast = timerOp.fetch('lastTile', -1)\n\tchoices = [i for i in range(len(players)) if i != last] or list(range(len(players)))\n\ti = random.choice(choices)\n\tplaying = {p.par.file.eval() for p in players}\n\tfree = [f for f in folders if f not in playing] or folders\n\tplayers[i].par.file = random.choice(free)\n\ttimerOp.store('lastTile', i)\n\ttimerOp.par.length = random.uniform(MIN_S, MAX_S)\n\n\ndef onInitialize(timerOp, callCount):\n\treturn 0\n\n\ndef onReady(timerOp):\n\treturn\n\n\ndef onStart(timerOp):\n\ttimerOp.par.length = random.uniform(MIN_S, MAX_S)\n\treturn\n\n\ndef onTimerPulse(timerOp, segment):\n\treturn\n\n\ndef whileTimerActive(timerOp, segment, cycle, fraction):\n\treturn\n\n\ndef onSegmentEnter(timerOp, segment, interrupt):\n\treturn\n\n\ndef onSegmentExit(timerOp, segment, interrupt):\n\treturn\n\n\ndef onCycleStart(timerOp, segment, cycle):\n\treturn\n\n\ndef onCycleEndAlert(timerOp, segment, cycle, alertSegment, alertDone, interrupt):\n\treturn\n\n\ndef onCycle(timerOp, segment, cycle):\n\t_changeOneScreen(timerOp)\n\treturn\n\n\ndef onDone(timerOp, segment, interrupt):\n\treturn\n\n\ndef onSubrangeStart(timerOp):\n\treturn\n"
-  dat_content_format: text
-- name: folder_clips1_callbacks
-  type: textDAT
-  flags:
-  - viewer
-  - -showDocked
-  position: [2900, -7320]
-  dock: folder_clips
-  dat_content: "\"\"\"\nFolder DAT Callbacks\n\nme - this DAT\n\ndat - the DAT that is querying\ninfo - the file or folder being queried\n\tname \t\t\t\t- the name with extension\n\tbaseName \t\t\t- the name without extension\n\tpath \t\t\t\t- the full path\n\textension \t\t\t- the extension of the file\n\tfolder \t\t\t\t- the path of the folder this is in\n\tisFolder\t\t\t- true if a folder, false if a file\n\tdepth \t\t\t\t- the depth of the file/folder from the root\n\tsize \t\t\t\t- size of file or folder\n\ttype \t\t\t\t- a description of the file type\n\tdateCreated \t\t- the file or folder creation date\n\tdateModified \t\t- the file or folder last modified date\n\tdateAccessed \t\t- the file or folder last accessed date\n\"\"\"\n\nfrom typing import List, Any\n\n# Uncomment following two functions to add custom columns\n\n# def onInitGetColumnNames(dat: folderDAT) -> List[str]:\n# \t\"\"\"\n# \tCalled to initialize custom column names. Return a list of column names.\n# \t\"\"\"\n# \treturn ['digits']\n\n# def onGetValues(dat: folderDAT, info: FileEntry, row: int) -> List[Any]:\n# \t\"\"\"\n# \tCalled to get custom column values. Return a list of values corresponding\n#   to the custom columns defined in onInitGetColumnNames.\n# \t\"\"\"\n# \treturn [dat.digits]\n\n# control which folders are included\n\ndef onGetInclude(dat: folderDAT, info: FileEntry, row: int) -> bool:\n\t\"\"\"\n\tCalled to determine if a file/folder should be included.\n\t\n\tArgs:\n\t\tdat: The DAT that is querying\n\t\tinfo: The FileEntry being queried\n\t\trow: The table row index\n\t\t\n\tReturns:\n\t\tbool: True if the file/folder should be included\n\t\"\"\"\n\treturn True\n\ndef onFound(dat: folderDAT, info: FileEntry, row: int):\n\t\"\"\"\n\tCalled when a file/folder is found.\n\t\n\tArgs:\n\t\tdat: The DAT that is querying\n\t\tinfo: The FileEntry that was found\n\t\trow: The table row index\n\t\"\"\"\n\treturn\n"
-  dat_content_format: text
 annotations:
 - name: annotate1
   mode: annotate
@@ -1360,7 +1356,7 @@ annotations:
 - name: annotate9
   mode: annotate
   title: Rendered clips -> non-interactive screens
-  text: The 7 small screens play PNG sequences instead of live hydra. movie_u01..07 (Movie File In, sequential, sample rate overridden to 60) each read a clip folder under Hydra/clips (320x180, 600 frames, rendered offline by Hydra/tools/render-clips.mjs from random presets). crop_u01..07 centre-crop the 320x180 clip to that screen's aspect in whole pixels (nearest filtering); select_u01..07 pull each screen's rectangle (rect_unique_xx) by reference, mat_uxx / geo_uxx texture them. folder_clips lists the clip folders; timer_clips cycles every random 5..10 s and its callbacks swap ONE random screen to a clip not already playing (never the same screen twice in a row). The browser wall no longer renders these screens. window_u01..07 (Window COMPs, closed until opened) output each crop_u0N to the display and pixel size given in ScreenMap's screens table; a 0 px size falls back to the crop's own resolution.
+  text: The 7 small screens play pre-rendered clips instead of live hydra. All 60 clips (320x180, 600 frames each, rendered offline by Hydra/tools/render-clips.mjs) are joined into ONE HAP movie, Hydra/clips-all.mov, in the order listed by clip_list (Hydra/clips-all.txt). movie_u01..07 all read that file with Specify Index; each index = its clip_state row's start + frames since t0, looped over 600. clip_switcher (Execute DAT, frame start) swaps ONE random screen every random 5..10 s to a clip not already playing (never the same screen twice in a row) by rewriting its clip_state row -- no file is opened or closed at runtime (swapping PNG-sequence folders crashed TD on the Mac after 1-2 h). crop_u01..07 centre-crop the 320x180 clip to that screen's aspect in whole pixels (nearest filtering); select_u01..07 pull each screen's rectangle (rect_unique_xx) by reference, mat_uxx / geo_uxx texture them. window_u01..07 (Window COMPs, closed until opened) output each crop_u0N to the display and pixel size given in ScreenMap's screens table; a 0 px size falls back to the crop's own resolution.
   position: [2830, -7450]
   size: [1870, 3350]
   color: [0.3, 0.3, 0.3]

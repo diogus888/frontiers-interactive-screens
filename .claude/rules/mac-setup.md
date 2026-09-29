@@ -21,14 +21,26 @@ Try in this order, one change at a time, and ask the user what happened after ea
 1. Move `TDPyEnvManagerContext.yaml` out of the folder, or set `active: false` in it,
    then open the .toe. (On 2026-09-28 it already showed as deleted in git status, so
    check whether it exists before assuming.)
-2. Make the Dropbox folder `Hydra/clips/` available offline. Seven Movie File In TOPs
-   (`/project1/base1/movie_u01..07`) load image-sequence folders from it on open.
+2. Make `Hydra/clips-all.mov` (741 MB, Git LFS in the repo) available offline. All seven
+   Movie File In TOPs (`/project1/base1/movie_u01..07`) open it on load.
 3. On Windows, save a copy with `/project1/base1/webrender1` (Web Render TOP, loads
    `http://localhost:8080/split?...`) and `/project1/base1/midiin_apc` (MIDI In CHOP,
    APC mini) turned off, and open that copy on the Mac.
 
 No hardcoded Windows paths were found in operator parameters. The Window COMPs
 (`window_u01..07`, `/perform`) are not set to open on start.
+
+## Known problem: crash after 1-2 hours on the Mac (reported 2026-09-28)
+
+A Mac user reported a crash every 1-2 hours. The one crash report (TD 2025.33230, macOS
+26.5.2, Apple Silicon, 2h19m uptime) was heap corruption (`BUG IN CLIENT OF LIBMALLOC:
+memory corruption of free block`), caught in TD's movie reader threads (`libMV`/`libNV`)
+while three sibling threads were decoding PNGs. At the time the players swapped
+PNG-sequence folders every 5-10 s (~1,000 open/close cycles per 2 h). On 2026-09-29 that
+was replaced: all clips are one HAP movie that stays open, and `clip_switcher` only moves
+the frame index (see README, Clips). Not yet confirmed on the Mac. If it still crashes,
+ask for the new `.ips` files from `~/Library/Logs/DiagnosticReports/` and compare the
+faulting thread's libraries.
 
 ## Shared machine files: do not break the Windows side
 

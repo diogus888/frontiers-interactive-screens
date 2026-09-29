@@ -5,7 +5,6 @@
 *.jpg binary -delta
 *.otf binary
 *.mp4 binary -delta
-
 # Embody / Envoy -- normalize TD line endings (auto-managed)
 *.py text eol=lf
 *.md text eol=lf
@@ -18,3 +17,4 @@
 *.tox binary
 *.command text eol=lf
 *.sh text eol=lf
+Hydra/clips-all.mov filter=lfs diff=lfs merge=lfs -text

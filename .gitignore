@@ -46,3 +46,8 @@ opencode.json
 !**/.embody/project.json
 .claude/projects/
 __pycache__/
+
+# --- Clips ---
+# Source PNG-sequence folders, kept in Dropbox only. The joined movie the players read,
+# Hydra/clips-all.mov, is in git through Git LFS (see .gitattributes).
+Hydra/clips/

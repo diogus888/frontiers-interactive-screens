@@ -111,10 +111,26 @@ drives the mockup and the crops from one table.
 
 `Hydra/clips/clip-NN_preset-N/` are 600-frame PNG sequences rendered from the presets by
 `Hydra/tools/render-clips.mjs` (headless Chrome via puppeteer-core, which it borrows from
-the sibling `Frontiers x Hydra/app/node_modules`; the preset server must be running). The
-TouchDesigner Movie File In TOPs read the folders as image sequences and a timer swaps a
-random screen to a clip not already playing every 5 to 10 s. New clips dropped into
-`Hydra/clips/` are picked up automatically.
+the sibling `Frontiers x Hydra/app/node_modules`; the preset server must be running).
+
+TouchDesigner does not read those folders. It plays `Hydra/clips-all.mov`, one HAP movie
+with all clips back to back (600 frames each, in the order listed in `Hydra/clips-all.txt`).
+The seven Movie File In TOPs keep that one file open and jump to a clip by frame index;
+the `clip_switcher` Execute DAT swaps one random screen to a clip not already playing every
+5 to 10 s. The players used to swap PNG folders at runtime, and TouchDesigner on the Mac
+crashed after 1 to 2 hours of that.
+
+After adding or re-rendering clips, rebuild the movie and reload the Movie File In TOPs:
+
+```
+node Hydra/tools/join-clips.mjs
+```
+
+It needs ffmpeg on the PATH. On Windows, close TouchDesigner first, because it keeps the
+movie open. `Hydra/clips/` is too big for git and is only shared through Dropbox.
+`clips-all.mov` (741 MB) is in the repo through [Git LFS](https://git-lfs.com): install
+Git LFS before cloning, or run `git lfs pull` afterwards, otherwise you get a small pointer
+file instead of the movie.
 
 ## Repository layout
 
@@ -125,8 +141,9 @@ random screen to a clip not already playing every 5 to 10 s. New clips dropped i
 | `Hydra/serve-presets.mjs`, `preset-1.html` | Preset server and page shell |
 | `Hydra/lib/midi.js` | Web MIDI helpers (`cc`, `ccs`, `note`, `midi.set`) |
 | `Hydra/presets/` | Template, JSONs and generated sketches |
-| `Hydra/tools/` | Preset generators and the clip renderer |
-| `Hydra/clips/` | Rendered clips for the non-interactive screens |
+| `Hydra/tools/` | Preset generators, the clip renderer and the clip joiner |
+| `Hydra/clips/` | Rendered PNG clips (Dropbox only, not in git) |
+| `Hydra/clips-all.mov`, `clips-all.txt` | The joined movie TouchDesigner plays (Git LFS) and its clip order |
 | `Hydra/hydra/` | Git submodule: the hydra editor fork ([diogus888/hydra-unlimited-buffers](https://github.com/diogus888/hydra-unlimited-buffers)), used for the wall's on-screen editor experiments. Not needed to run the wall |
 | `Unique screens hydra presets/` | App exports for the seven unique screens |
 | `Mockup Screens/` | Screen layout mockup |
